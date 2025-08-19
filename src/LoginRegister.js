@@ -14,6 +14,7 @@ function LoginRegister(){
         });
     }
     return(
+        <div className="body">
         <div className='content justify-content-center align-items-center d-flex shadow-lg' id='content'>
            {/*register form */}
            <div className='col-md-6 d-flex justify-content-center'>
@@ -94,6 +95,7 @@ function LoginRegister(){
              </div>
 
 
+        </div>
         </div>
     )
 
