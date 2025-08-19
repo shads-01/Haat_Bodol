@@ -1,0 +1,16 @@
+.product-card:hover {
+  transform: scale(1.07);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  transition: all 0.5s ease;
+}
+.product-card img {
+    object-fit:cover;
+}
+.lc-btn > button:hover,
+.ac-btn > button:hover {
+  background-color: rgba(0, 0, 0, 0) !important;
+  color: black !important;
+}
+.filter-btn:hover, .sort-btn:hover {
+    background-color: rgb(33,37,41) !important;
+}
