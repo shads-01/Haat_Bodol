@@ -1,5 +1,6 @@
 import { click } from '@testing-library/user-event/dist/click';
 import React from 'react'
+import { useNavigate } from 'react-router-dom';
 function LoginRegister(){
     function SwitchContent(){
         const content = document.getElementById('content');
@@ -13,6 +14,11 @@ function LoginRegister(){
             content.classList.remove("active")
         });
     }
+    const navigate = useNavigate();
+    function handleNavigation() {
+        navigate('/donations');
+    }
+
     return(
         <div className="body">
         <div className='content justify-content-center align-items-center d-flex shadow-lg' id='content'>
@@ -41,7 +47,7 @@ function LoginRegister(){
                 </div>
                  
                 <div className='input-group mb-3 justify-content-center'>
-                    <button className='btn border-white text-white w-50 fs-6'>Register</button>
+                    <button className='btn border-white text-white w-50 fs-6' onClick={handleNavigation}>Register</button>
                 </div>
                 
             </form>
@@ -72,7 +78,7 @@ function LoginRegister(){
                     </div>
                  </div>
                 <div className='input-group mb-3 justify-content-center'>
-                    <button className='btn border-white text-white w-50 fs-6'>Login</button>
+                    <button className='btn border-white text-white w-50 fs-6' onClick={handleNavigation}>Login</button>
                 </div>
                 
             </form>
