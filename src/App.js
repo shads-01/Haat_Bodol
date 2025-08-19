@@ -6,16 +6,14 @@ import NavigationBar from "./components/NavigationBar";
 
 function App() {
   return (
-    <>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<HomePage />}/>
-          <Route path="/home" element={<HomePage />}/>
-          <Route path="/login-register" element={<LoginRegister />}></Route>
-          <Route path="/donations" element={<Donations />}/>
-        </Routes>
-      </BrowserRouter>
-    </>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Donations />} />
+        <Route path="/home" element={<HomePage />} />
+        <Route path="/login-register" element={<LoginRegister />}></Route>
+        <Route path="/donations" element={<Donations />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
