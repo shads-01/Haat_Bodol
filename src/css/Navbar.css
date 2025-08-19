@@ -1,26 +1,6 @@
 .navbar {
     background-color: rgb(105, 167, 145);
 }
-.navitem {
-    color: beige !important;
-    font-weight: 500 !important;
-    padding: 0 !important;
-    position: relative;
-    transition: color 0.3s ease;
-}
-.navitem::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: -5px;
-  width: 0%;
-  height: 2px;
-  background: beige;
-  transition: width 0.3s ease;
-}
-.navitem:hover::after {
-  width: 100%;
-}
 .list-btn {
     color: beige !important;
 }
@@ -34,4 +14,7 @@
 }
 .search-btn:hover {
     background-color: rgba(0, 0, 0, 0) !important;    
+}
+.nav-link {
+  color: black !important;
 }
