@@ -3,6 +3,7 @@ import LoginRegister from "./LoginRegister";
 import Donations from "./components/Donations";
 import HomePage from "./components/HomePage";
 import NavigationBar from "./components/NavigationBar";
+import Profile from "./components/Profile";
 
 function App() {
   return (
@@ -11,8 +12,9 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />}/>
           <Route path="/home" element={<HomePage />}/>
-          <Route path="/login-register" element={<LoginRegister />}></Route>
+          <Route path="/login-register" element={<LoginRegister />}/>
           <Route path="/donations" element={<Donations />}/>
+          <Route path="/profile" element={<Profile />}/>
         </Routes>
       </BrowserRouter>
     </>
