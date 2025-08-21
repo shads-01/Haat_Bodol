@@ -15,7 +15,8 @@ function LoginRegister(){
         });
     }
     const navigate = useNavigate();
-    function handleNavigation() {
+    function handleNavigation(e) {
+        e.preventDefault();
         navigate('/donations');
     }
 
@@ -47,7 +48,7 @@ function LoginRegister(){
                 </div>
                  
                 <div className='input-group mb-3 justify-content-center'>
-                    <button className='btn border-white text-white w-50 fs-6' onClick={handleNavigation}>Register</button>
+                    <button className='lr-btn border-white text-white w-50 fs-6' onClick={handleNavigation}>Register</button>
                 </div>
                 
             </form>
@@ -78,7 +79,7 @@ function LoginRegister(){
                     </div>
                  </div>
                 <div className='input-group mb-3 justify-content-center'>
-                    <button className='btn border-white text-white w-50 fs-6' onClick={handleNavigation}>Login</button>
+                    <button className='lr-btn border-white text-white w-50 fs-6' onClick={handleNavigation}>Login</button>
                 </div>
                 
             </form>
@@ -89,13 +90,13 @@ function LoginRegister(){
                     <div className='switch-panel switch-left'>
                         <h1>Hello, Again</h1>
                         <p>We are happy to see you back</p>
-                        <button className='hidden btn text-white w-50 fs-6' id='login' onClick={SwitchContent}>Login</button>
+                        <button className='hidden lr-btn border-white text-white w-50 fs-6' id='login' onClick={SwitchContent}>Login</button>
                     </div>
                      <div className='switch-panel switch-right'>
                         <h1>Welcome To</h1>
                         <h1>হাতবদল</h1>
                         <p>Join Our Unique Platform, Explore a New Experience</p>
-                        <button className='hidden btn  border-white text-white w-50 fs-6' id='register' onClick={SwitchContent}>Register</button>
+                        <button className='hidden lr-btn  border-white text-white w-50 fs-6' id='register' onClick={SwitchContent}>Register</button>
                     </div>
                 </div>
              </div>

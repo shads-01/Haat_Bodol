@@ -1,19 +1,19 @@
 .navbar {
     background-color: rgb(105, 167, 145);
 }
-.list-btn {
+.list-btn,.menu-btn {
     color: beige !important;
 }
-.list-btn:hover {
+.list-btn:hover,
+.menu-btn:hover,
+.search-btn:hover {
     background-color: rgba(0, 0, 0, 0) !important;
+    color: black !important;
 }
 .search-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-.search-btn:hover {
-    background-color: rgba(0, 0, 0, 0) !important;    
 }
 .nav-link {
   color: black !important;
