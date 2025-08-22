@@ -9,7 +9,6 @@ import {
   Button,
   Badge,
   ButtonGroup,
-  Dropdown,
   DropdownButton,
   Offcanvas,
   Form,
@@ -22,33 +21,47 @@ function Donations() {
   const handleClose = () => setShow(false);
   const toggleShow = () => setShow((s) => !s);
   const totalProducts = Array(8).fill(0);
+  
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "rgb(243,238,230)" }}>
       <NavigationBar />
-      <Container fluid className="px-5 py-4">
-        <Row className="my-2 mx-1 d-flex align-items-center justify-content-between">
+      <Container fluid className="px-3 px-md-5 py-4">
+        <Row className="my-1 mx-1 d-flex align-items-center justify-content-between">
           <Col xs="auto">
             <DropdownButton
-              title={"Location"}
+              title={
+                <>
+                  <span className="d-none d-sm-inline">Location</span>
+                  <span className="d-sm-none">Loc</span>
+                </>
+              }
               as={ButtonGroup}
               variant="dark"
-              className="me-3 lc-btn"
+              size="sm"
+              className="me-2 me-md-3 lc-btn"
             ></DropdownButton>
             <DropdownButton
-              title={"Categories"}
+              title={
+                <>
+                  <span className="d-none d-sm-inline">Categories</span>
+                  <span className="d-sm-none">Cat</span>
+                </>
+              }
               as={ButtonGroup}
               variant="dark"
+              size="sm"
               className="lc-btn"
             ></DropdownButton>
           </Col>
           <Col xs="auto" className="d-flex justify-content-center">
-            <div className="me-3">
+            <div className="me-2 me-md-3">
               <Button
                 variant="outline-dark"
                 className="sort-btn d-flex align-items-center"
+                size="sm"
               >
                 <ArrowUpDown size={16} className="me-1" />
-                Sort by
+                <span className="d-none d-sm-inline">Sort by</span>
               </Button>
             </div>
             <div>
@@ -56,9 +69,10 @@ function Donations() {
                 variant="outline-dark"
                 onClick={toggleShow}
                 className="filter-btn me-2 d-flex align-items-center"
+                size="sm"
               >
                 <SlidersHorizontal size={16} className="me-1" />
-                More Filters
+                <span className="d-none d-sm-inline">More Filters</span>
               </Button>
               {/* Filter offcanvas */}
               <Offcanvas
@@ -147,43 +161,48 @@ function Donations() {
             </div>
           </Col>
         </Row>
-        <Row className="g-4 my-2 d-flex justify-content-start">
+        
+        {/* Responsive card grid */}
+        <Row className="g-3 g-md-4 my-2">
           {totalProducts.map((__, index) => (
-            <Col lg="auto">
+            <Col 
+              key={index}
+              xs={12} 
+              sm={6} 
+              md={4} 
+              lg={3} 
+              xl={3} 
+              xxl={3}
+              className="d-flex justify-content-center mb-3"
+            >
               <Card
-                className="product-card mb-4 shadow-sm mx-1"
-                style={{ width: "17rem" }}
+                className="product-card shadow-sm h-100"
+                style={{ width: "100%", maxWidth: "280px" }}
               >
                 <Card.Img
                   variant="top"
-                  width={600}
-                  height={200}
                   src="https://placehold.co/600x400"
                 />
-                <Card.Body>
-                  <div className="pb-2">
-                    <Card.Title>Product Name</Card.Title>
-                    <Card.Text className="text-muted fs-6 mb-1">
-                      <small>
-                        Lorem ipsum dolor sit amet, conse ctetur adipiscing
-                        elit.
-                      </small>
+                <Card.Body className="d-flex flex-column">
+                  <div className="pb-2 flex-grow-1">
+                    <Card.Title className="h5 mb-2">Product Name</Card.Title>
+                    <Card.Text className="text-muted small mb-2">
+                      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
                     </Card.Text>
                   </div>
-                  <div className="d-flex align-items-center justify-content-between border-top py-2">
+                  <div className="d-flex align-items-center justify-content-between border-top pt-2 mt-auto">
                     <div className="text-muted d-flex flex-column">
                       <div className="d-flex align-items-center mb-1">
-                        <Clock size={17} className="me-2" />
+                        <Clock size={14} className="me-2" />
                         <small>2 hours ago</small>
                       </div>
                       <div className="d-flex align-items-center">
-                        <MapPin size={17} className="me-2" />
+                        <MapPin size={14} className="me-2" />
                         <small>Dhaka</small>
                       </div>
                     </div>
-
                     <div>
-                      <Badge pill bg="info">
+                      <Badge pill bg="info" className="small">
                         Reserved
                       </Badge>
                     </div>
@@ -197,5 +216,4 @@ function Donations() {
     </div>
   );
 }
-
 export default Donations;
