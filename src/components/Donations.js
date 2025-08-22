@@ -26,18 +26,30 @@ function Donations() {
     <div style={{ minHeight: "100vh", backgroundColor: "rgb(243,238,230)" }}>
       <NavigationBar />
       <Container fluid className="px-3 px-md-5 py-4">
-        <Row className="my-2 mx-1 d-flex align-items-center justify-content-between">
+        <Row className="my-1 mx-1 d-flex align-items-center justify-content-between">
           <Col xs="auto">
             <DropdownButton
-              title={"Location"}
+              title={
+                <>
+                  <span className="d-none d-sm-inline">Location</span>
+                  <span className="d-sm-none">Loc</span>
+                </>
+              }
               as={ButtonGroup}
               variant="dark"
+              size="sm"
               className="me-2 me-md-3 lc-btn"
             ></DropdownButton>
             <DropdownButton
-              title={"Categories"}
+              title={
+                <>
+                  <span className="d-none d-sm-inline">Categories</span>
+                  <span className="d-sm-none">Cat</span>
+                </>
+              }
               as={ButtonGroup}
               variant="dark"
+              size="sm"
               className="lc-btn"
             ></DropdownButton>
           </Col>
@@ -161,7 +173,7 @@ function Donations() {
               lg={3} 
               xl={3} 
               xxl={3}
-              className="d-flex justify-content-center"
+              className="d-flex justify-content-center mb-3"
             >
               <Card
                 className="product-card shadow-sm h-100"
@@ -204,5 +216,4 @@ function Donations() {
     </div>
   );
 }
-
 export default Donations;
