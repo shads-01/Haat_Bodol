@@ -25,6 +25,8 @@ function LoginRegister(){
         <div className='content justify-content-center align-items-center d-flex shadow-lg' id='content'>
            {/*register form */}
            <div className='col-md-6 d-flex justify-content-center'>
+            <div className="w-100 px-3">
+                
             <form>
                 <div className='header-text mb-4'>
                     <h1>Create Account</h1>
@@ -48,10 +50,11 @@ function LoginRegister(){
                 </div>
                  
                 <div className='input-group mb-3 justify-content-center'>
-                    <button className='lr-btn border-white text-white w-50 fs-6' onClick={handleNavigation}>Register</button>
+                    <button className='lr-btn border-white text-white w-100 fs-6' onClick={handleNavigation}>Register</button>
                 </div>
                 
             </form>
+            </div>
            </div>
 
            {/*Login form */}
