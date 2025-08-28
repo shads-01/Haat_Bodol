@@ -1,11 +1,9 @@
 import React from "react";
 import Carousel from "react-bootstrap/Carousel";
 import "../css/HomePage.css";
-import home1 from "../assets/home1.jpeg";
-import home2 from "../assets/home2.jpg";
-import home3 from "../assets/home3.jpg";
-import { Container, Card, Row, Col, Button } from "react-bootstrap";
-import { Search, HeartHandshake, Send, ChevronRight } from "lucide-react";
+import { Container, Card, Row, Col } from "react-bootstrap";
+import { Search, HeartHandshake, Send, ChevronRight, HandHeart, Leaf, Users, Rocket } from "lucide-react";
+import Footer from "./Footer";
 
 function HomePage() {
   const categories = [
@@ -26,6 +24,28 @@ function HomePage() {
       image: require("../assets/categories/appliances.jpg"),
     },
   ];
+  const aboutcards = [
+    {
+      title: "Community Connection",
+      logo: Users,
+      body: "We bring people together by creating a trusted space where kindness and sharing lead the way.",
+    },
+    {
+      title: "Sustainable Impact",
+      logo: Leaf,
+      body: "By encouraging reuse and exchange, we help reduce waste and promote eco-friendly living.",
+    },
+    {
+      title: "Kindness in Action",
+      logo: HandHeart,
+      body: "Every donation is more than just an item — it’s an act of care that touches lives.",
+    },
+    {
+      title: "Simple & Accessible",
+      logo: Rocket,
+      body: "Our platform is designed to make giving and receiving effortless, so everyone can take part in change.",
+    },
+  ];
 
   return (
     <>
@@ -35,7 +55,7 @@ function HomePage() {
             <Carousel.Item interval={3000}>
               <img
                 className="d-block w-100"
-                src={home1}
+                src={require("../assets/home1.jpeg")}
                 alt="First slide"
                 style={{
                   height: "85vh",
@@ -47,7 +67,7 @@ function HomePage() {
             <Carousel.Item interval={3000}>
               <img
                 className="d-block w-100"
-                src={home2}
+                src={require("../assets/home2.jpg")}
                 alt="Second slide"
                 style={{
                   height: "85vh",
@@ -59,7 +79,7 @@ function HomePage() {
             <Carousel.Item interval={3000}>
               <img
                 className="d-block w-100"
-                src={home3}
+                src={require("../assets/home3.jpg")}
                 alt="Third slide"
                 style={{
                   height: "85vh",
@@ -74,11 +94,79 @@ function HomePage() {
             <p>
               Donate what you don't need and help someone in your community.
             </p>
-            <button className="slider-btn mt-1">Join Us Now</button>
+            <button
+              className="slider-btn mt-1"
+              onClick={() => {
+                window.location.href = "/login-register";
+              }}
+            >
+              Join Us Now
+            </button>
           </Carousel.Caption>
         </Container>
 
-        <Container fluid className="steps-body my-5">
+        <Container
+          fluid
+          className="about-body mt-5 mb-4"
+          style={{
+            backgroundColor: "rgb(242,236,219)",
+            width: "99.2vw",
+            marginLeft: "-3rem",
+            padding: "4rem 4rem",
+          }}
+        >
+          <h1 className="fw-bold">Our Vision</h1>
+          <p
+            className="my-3"
+            style={{
+              fontWeight: "500",
+              fontSize: "1.3rem",
+              textAlign: "justify",
+            }}
+          >
+            At <b>হাতবদল</b>, we imagine a world where no useful item is left
+            unused and no helping hand goes unnoticed. Our vision is to create a
+            simple and accessible platform that encourages people to donate,
+            share, and exchange everyday items with ease. By connecting givers
+            and receivers, we reduce waste, promote sustainability, and
+            strengthen the bonds of community. Through small acts of kindness,
+            we believe we can build a culture of generosity that makes a lasting
+            difference.
+            <Row className="d-flex justify-content-center g-0 mt-3">
+              {aboutcards.map((acard, idx) => {
+                const Logo = acard.logo;
+                return (
+                  <Col xs={12} md={6} lg={3} className="d-flex">
+                    <Card className="px-4 my-3 h-100 d-flex align-items-center text-center">
+                      <div
+                        className="d-flex align-items-center justify-content-center mb-3 border border-dark rounded-circle"
+                        style={{ width: "70px", height: "70px" }}
+                      >
+                        <Logo strokeWidth={2} size={32} className="logo" />
+                      </div>
+
+                      <Card.Body className="p-0">
+                        <Card.Title className="fw-bold mb-2">
+                          {acard.title}
+                        </Card.Title>
+                        <Card.Text
+                          className="px-4"
+                          style={{ fontWeight: "300", fontSize: "1.1rem" }}
+                        >
+                          {acard.body}
+                        </Card.Text>
+                      </Card.Body>
+                    </Card>
+                    {idx !== aboutcards.length - 1 && <div className="vline" />}
+                  </Col>
+                );
+              })}
+            </Row>
+          </p>
+        </Container>
+
+        {/* Simple Steps Section */}
+        <Container fluid className="steps-body my-5 py-5">
           <h1 className="fw-bold">Simple Steps To Make A Difference</h1>
           <p className="my-2">
             Out platform makes it easy to give and receive donations.
@@ -127,13 +215,14 @@ function HomePage() {
           </Row>
         </Container>
 
+        {/* Explore by Category */}
         <Container fluid className="categories-body">
           <h1 className="fw-bold">Explore by Category</h1>
           <p className="my-2">
             Browse different item categories to easily find what you need or
             share what you have.
           </p>
-          <Row className="d-flex justify-content-center g-4 mt-2">
+          <Row className="d-flex justify-content-center g-5 mt-2">
             {categories.map((cat, index) => (
               <Col
                 key={index}
@@ -163,10 +252,9 @@ function HomePage() {
               className="d-flex justify-content-center mb-3"
             >
               <Card
-                className="sm-card shadow-sm d-flex align-items-center justify-content-center text-center"
+                className="sm-card shadow-sm"
                 style={{
                   width: "100%",
-                  minHeight: "250px",
                   cursor: "pointer",
                   transition: "all 0.3s ease",
                   textDecoration: "none",
@@ -176,8 +264,15 @@ function HomePage() {
                 }}
               >
                 <Card.Body className="d-flex flex-column align-items-center justify-content-center">
-                    <ChevronRight size={30} strokeWidth={3} style={{color: "rgb(104, 189, 159)"}}/>
-                  <Card.Title className="mb-0" style={{ color: "rgb(104, 189, 159)" }}>
+                  <ChevronRight
+                    size={30}
+                    strokeWidth={3}
+                    style={{ color: "rgb(104, 189, 159)" }}
+                  />
+                  <Card.Title
+                    className="mb-0"
+                    style={{ color: "rgb(104, 189, 159)" }}
+                  >
                     See more
                   </Card.Title>
                 </Card.Body>
@@ -186,6 +281,7 @@ function HomePage() {
           </Row>
         </Container>
       </div>
+      <Footer />
     </>
   );
 }

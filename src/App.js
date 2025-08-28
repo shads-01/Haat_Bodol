@@ -2,7 +2,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LoginRegister from "./LoginRegister";
 import Donations from "./components/Donations";
 import HomePage from "./components/HomePage";
-import NavigationBar from "./components/NavigationBar";
 import Profile from "./components/Profile";
 
 function App() {
@@ -10,7 +9,7 @@ function App() {
     <>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<LoginRegister />} />
+          <Route path="/" element={<HomePage />} />
           <Route path="/home" element={<HomePage />} />
           <Route path="/login-register" element={<LoginRegister />} />
           <Route path="/donations" element={<Donations />} />

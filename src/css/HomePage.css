@@ -1,6 +1,6 @@
 .home-body {
     min-height: 100vh;
-    padding: 2rem 3rem;
+    padding: 3rem;
     font-family: "Nunito Sans";
 }
 .carousel-item::before {
@@ -54,6 +54,11 @@
     z-index: 10 !important;
 }
 
+ .about-body .card {
+    background: none !important;
+    border: none;
+
+ }
 .categories-body img {
     height: 180px;
     object-fit: cover;
@@ -66,6 +71,14 @@
 .sm-card {
     border: 2px rgb(105, 167, 145) solid !important;
     background-color: rgba(105, 167, 145, .15) !important;
+    max-height: 246px !important;
+}
+.vline {
+    width: 1px !important;
+    background-color: #ccc;
+    margin: auto 0;
+    height: 60%;
+
 }
 
 @media (max-width: 1100px) {
@@ -108,5 +121,23 @@
     }
     .carousel-item img {
         height: 50vh !important;
+    }
+    .about-body {
+        padding: 3rem !important;
+    }
+    .about-body p {
+        font-size: 1em !important;
+        line-height: 18px;
+
+    }
+    .about-body .card {
+        padding: 0px !important;
+    }
+    .vline {
+        display: none !important;
+    }
+    .about-body .logo {
+        width: 20px !important;
+        height: 20px !important;
     }
 }
