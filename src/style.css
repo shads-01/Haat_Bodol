@@ -129,27 +129,4 @@
         width: 100%;
         padding: 20px;
     }
-
-    .btn {
-        width: 100% !important;
-    }
-
-    .input-group {
-        flex-direction: column;
-    }
-
-    .input-group .form-control {
-        width: 100%;
-    }
-
-    .form-check {
-        margin-bottom: 10px;
-    }
-}
-
-@media (max-width: 768px) {
-    body {
-        padding: 20px;
-        height: auto;
-    }
 }
