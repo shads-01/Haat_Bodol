@@ -53,10 +53,12 @@ function NavigationBar() {
             <Col xs="auto" className="d-none d-lg-flex align-items-end me-3">
               <Nav className="ms-auto d-flex align-items-center gap-4">
                 <Button
+                  as={NavLink}
+                  to={'/post-item'}
                   variant="dark"
                   className="list-btn fw-400 border ackborder-2 border-black"
                 >
-                  List an Item
+                  Post an Item
                 </Button>
                 <NavLink to="#" className="nav-link">
                   <MessageSquareText strokeWidth={2.5} />
@@ -121,11 +123,11 @@ function NavigationBar() {
             <div className="d-flex justify-content-center mb-3">
               <Button
                 as={NavLink}
-                to="/profile"
+                to="/post-item"
                 variant="dark"
                 className="list-btn w-100"
               >
-                List an Item
+                Post an Item
               </Button>
             </div>
             <div className="d-flex flex-column gap-3">
