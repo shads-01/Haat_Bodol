@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { React, useState } from "react";
 import NavigationBar from "./NavigationBar";
 import "../css/Donations.css";
@@ -148,14 +149,20 @@ function Donations() {
                     />
                   </div>
                   {/* Apply / Clear Buttons */}
-                  <div className="mt-auto d-flex justify-content-between ac-btn">
+                  {/* <div className="mt-auto d-flex justify-content-between ac-btn">
                     <Button variant="secondary" size="sm" onClick={() => {}}>
                       Clear All
                     </Button>
                     <Button variant="dark" size="sm" onClick={() => {}}>
                       Apply Filters
                     </Button>
+                  </div> */}
+
+                  <div className="mt-auto d-flex justify-content-between ac-btn">
+                    <Button variant="secondary" size="sm">Clear All</Button>
+                    <Button variant="dark" size="sm">Apply Filters</Button>
                   </div>
+
                 </Offcanvas.Body>
               </Offcanvas>
             </div>
@@ -175,6 +182,14 @@ function Donations() {
               xxl={3}
               className="d-flex justify-content-center mb-3"
             >
+
+             <Link 
+                to={`/product/${index}`} 
+                style={{ textDecoration: "none", color: "inherit" }} 
+              >
+
+
+
               <Card
                 className="product-card shadow-sm h-100"
                 style={{ width: "100%", maxWidth: "280px" }}
@@ -209,6 +224,7 @@ function Donations() {
                   </div>
                 </Card.Body>
               </Card>
+              </Link>
             </Col>
           ))}
         </Row>
