@@ -31,6 +31,7 @@ function ItemsPostingPage() {
                 type="text"
                 placeholder="A white sofa, Atomic habits..."
                 className="bg-light px-3 py-2"
+                required
               />
             </div>
             
@@ -51,16 +52,16 @@ function ItemsPostingPage() {
             {/* Category */}
             <div className="form-container mb-4">
               <Form.Label className="fw-semibold">Choose a category</Form.Label>
-              <Form.Select className="bg-light">
+              <Form.Select className="bg-light" required>
                 <option value="">Category</option>
                 <option value="electronics">Electronics</option>
-                <option value="furniture">Furnitures</option>
+                <option value="furnitures">Furnitures</option>
                 <option value="books">Books</option>
-                <option value="clothing">Clothes</option>
-                <option value="sports">Toys</option>
-                <option value="sports">Utensils</option>
-                <option value="sports">Appliances</option>
-                <option value="other">Other</option>
+                <option value="clothes">Clothes</option>
+                <option value="toys">Toys</option>
+                <option value="utensils">Utensils</option>
+                <option value="appliances">Appliances</option>
+                <option value="others">Others</option>
               </Form.Select>
             </div>
 
@@ -88,6 +89,7 @@ function ItemsPostingPage() {
                           : "Broken"
                       }
                       className="mb-2"
+                      required
                     />
                   )
                 )}
@@ -98,7 +100,7 @@ function ItemsPostingPage() {
             <div className="form-container mb-4">
               <Form.Label className="fw-semibold">Add photos</Form.Label>
               <Row className="g-3">
-                {[...Array(5).fill(null)].map((_, index) => (
+                {[...Array(4).fill(null)].map((_, index) => (
                   <Col xs={6} md={4} lg={3} key={index}>
                     <PhotoUploadBox />
                   </Col>
@@ -111,7 +113,7 @@ function ItemsPostingPage() {
                   fontSize: "12px",
                 }}
               >
-                5 photos max
+                4 photos max
               </div>
             </div>
 
@@ -124,6 +126,7 @@ function ItemsPostingPage() {
                 type="text"
                 placeholder="Preferred meeting time"
                 className="bg-light px-3 py-2"
+                required
               />
             </div>
 
