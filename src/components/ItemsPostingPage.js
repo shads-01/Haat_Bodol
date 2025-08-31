@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React from "react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import NavigationBar from "./NavigationBar";
-import { Camera } from "lucide-react";
 import "../css/PostItem.css";
 import PhotoUploadBox from "./PhotoUploadBox";
+import axios from "axios";
 
 function ItemsPostingPage() {
   return (
