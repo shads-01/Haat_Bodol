@@ -8,6 +8,7 @@ const itemSchema = new mongoose.Schema(
   },
   description: {
     type: String,
+    maxlength: 400, 
   },
   category: {
     type: String,
@@ -22,11 +23,7 @@ const itemSchema = new mongoose.Schema(
     default: "used",
   },
   //photos: [String], //Image urls
-  meetingPref: {
-    date: Date,
-    time: String,
-  },
-  location: {
+  address: {
     type: String,
     required: true,
   },
