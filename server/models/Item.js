@@ -1,3 +1,4 @@
+import { Factory } from "lucide-react";
 import mongoose from "mongoose";
 
 const itemSchema = new mongoose.Schema(
@@ -28,6 +29,10 @@ const itemSchema = new mongoose.Schema(
     required: true,
   },
   //createdBy --> user id
+  reserved: {
+    type: Boolean,
+    default: false,
+  }
 },
   {timestamps: true},
 );
