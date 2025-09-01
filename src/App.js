@@ -4,6 +4,7 @@ import Donations from "./components/Donations";
 import HomePage from "./components/HomePage";
 import Profile from "./components/Profile";
 import ItemsPostingPage from "./components/ItemsPostingPage";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="/profile" element={<Profile />} />
         </Routes>
       </BrowserRouter>
+      <Toaster />
     </>
   );
 }

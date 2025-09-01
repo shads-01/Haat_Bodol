@@ -4,7 +4,7 @@ import NavigationBar from "./NavigationBar";
 import "../css/PostItem.css";
 import PhotoUploadBox from "./PhotoUploadBox";
 import axios from "axios";
-import { ToastContainer, toast } from "react-toastify";
+import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 function ItemsPostingPage() {
@@ -20,6 +20,26 @@ function ItemsPostingPage() {
     address: "",
   });
 
+  const validateForm = () => {
+    if (!formData.title.trim()) {
+      toast.error("Please enter a title for your item");
+      return false;
+    }
+    if (!formData.category) {
+      toast.error("Please choose a category");
+      return false;
+    }
+    if (!formData.condition) {
+      toast.error(" Please select the item condition");
+      return false;
+    }
+    if (!formData.address.trim()) {
+      toast.error("Please enter your location");
+      return false;
+    }
+    return true;
+  };
+
   const handleInput = (key, value) => {
     setFormData((prev) => ({
       ...prev,
@@ -30,11 +50,17 @@ function ItemsPostingPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!validateForm()) {
+      return;
+    }
+
     setLoading(true);
+    const loadingToast = toast.loading("Adding your item...");
     try {
       await axios.post("http://localhost:5000/api/items", formData);
 
       //Added alert
+      toast.dismiss(loadingToast);
       toast.success("Item Added successfully!");
 
       //Reset formData
@@ -80,7 +106,6 @@ function ItemsPostingPage() {
                   type="text"
                   placeholder="A white sofa, Atomic habits..."
                   className="bg-light px-3 py-2"
-                  required
                   onChange={(e) => handleInput("title", e.target.value)}
                 />
               </div>
@@ -108,7 +133,6 @@ function ItemsPostingPage() {
                 </Form.Label>
                 <Form.Select
                   className="bg-light"
-                  required
                   onChange={(e) => handleInput("category", e.target.value)}
                 >
                   <option value="">Category</option>
@@ -129,31 +153,26 @@ function ItemsPostingPage() {
                   Condition of your item
                 </Form.Label>
                 <div>
-                  {["like-new", "good", "used", "broken"].map(
-                    (condition) => (
-                      <Form.Check
-                        key={condition}
-                        type="radio"
-                        id={condition}
-                        name="condition"
-                        value={condition}
-                        label={
-                          condition === "like-new"
-                            ? "Like New"
-                            : condition === "good"
-                            ? "Good condition"
-                            : condition === "used"
-                            ? "Used"
-                            : "Broken"
-                        }
-                        className="mb-2"
-                        required
-                        onChange={(e) =>
-                          handleInput("condition", e.target.value)
-                        }
-                      />
-                    )
-                  )}
+                  {["like-new", "good", "used", "broken"].map((condition) => (
+                    <Form.Check
+                      key={condition}
+                      type="radio"
+                      id={condition}
+                      name="condition"
+                      value={condition}
+                      label={
+                        condition === "like-new"
+                          ? "Like New"
+                          : condition === "good"
+                          ? "Good condition"
+                          : condition === "used"
+                          ? "Used"
+                          : "Broken"
+                      }
+                      className="mb-2"
+                      onChange={(e) => handleInput("condition", e.target.value)}
+                    />
+                  ))}
                 </div>
               </div>
 
@@ -185,7 +204,6 @@ function ItemsPostingPage() {
                   type="text"
                   placeholder="Enter an address"
                   className="bg-light px-3 py-2"
-                  required
                   onChange={(e) => handleInput("address", e.target.value)}
                 />
                 <div className="fs-6 text-center my-2 fw-semibold">or</div>
