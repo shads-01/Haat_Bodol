@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 
 function ItemsPostingPage() {
   const [loading, setLoading] = useState(false);
+  const [photos, setPhotos] = useState([null, null, null, null]); // Keep as array
 
   const navigate = useNavigate();
 
@@ -30,7 +31,7 @@ function ItemsPostingPage() {
       return false;
     }
     if (!formData.condition) {
-      toast.error(" Please select the item condition");
+      toast.error("Please select the item condition");
       return false;
     }
     if (!formData.address.trim()) {
@@ -56,14 +57,27 @@ function ItemsPostingPage() {
 
     setLoading(true);
     const loadingToast = toast.loading("Adding your item...");
+
     try {
-      await axios.post("http://localhost:5000/api/items", formData);
+      const formDataObj = new FormData();
 
-      //Added alert
+      Object.entries(formData).forEach(([key, value]) => {
+        formDataObj.append(key, value);
+      });
+
+      photos.forEach((file) => {
+        if (file) {
+          formDataObj.append("itemPhotos", file);
+        }
+      });
+
+      // Send the FormData object (not formData!)
+      await axios.post("http://localhost:5000/api/items", formDataObj);
+
       toast.dismiss(loadingToast);
-      toast.success("Item Added successfully!");
+      toast.success("Item added successfully!");
 
-      //Reset formData
+      // Reset form
       setFormData({
         title: "",
         description: "",
@@ -71,11 +85,13 @@ function ItemsPostingPage() {
         condition: "",
         address: "",
       });
+      setPhotos([null, null, null, null]); // Reset photos too
 
       navigate("/donations");
     } catch (error) {
+      toast.dismiss(loadingToast);
       toast.error("Couldn't add the item!");
-      console.log("Error adding item.", error);
+      console.log("Error adding item:", error);
     } finally {
       setLoading(false);
     }
@@ -180,9 +196,15 @@ function ItemsPostingPage() {
               <div className="form-container mb-4">
                 <Form.Label className="fw-semibold">Add photos</Form.Label>
                 <Row className="g-3">
-                  {[...Array(4).fill(null)].map((_, index) => (
+                  {photos.map((photo, index) => (
                     <Col xs={6} md={4} lg={3} key={index}>
-                      <PhotoUploadBox />
+                      <PhotoUploadBox
+                        onChange={(file) => {
+                          const newPhotos = [...photos]; // Keep as array
+                          newPhotos[index] = file;
+                          setPhotos(newPhotos);
+                        }}
+                      />
                     </Col>
                   ))}
                 </Row>

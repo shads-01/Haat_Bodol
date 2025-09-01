@@ -5,6 +5,7 @@ import { Button } from "react-bootstrap";
 
 function PhotoUploadBox({ onChange }) {
   const [image, setImage] = useState(null);
+
   const fileInputRef = useRef(null);
 
   const handleImageChange = (e) => {
@@ -39,6 +40,8 @@ function PhotoUploadBox({ onChange }) {
         accept="image/*"
         onChange={handleImageChange}
         style={{ display: "none" }}
+        multiple
+        name="itemPhotos"
       />
 
       {image ? (
