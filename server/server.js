@@ -10,8 +10,20 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.get("/api/health", (req, res) => {
-  res.json({ ok: true, message: "Server is running ✅" });
+//app.use --> middleware
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
+
+app.get("/", (req, res) => {
+  res.json({
+    message: "Haat_Bodol API Server",
+    endpoints: {
+      health: "/api/health",
+      donations: "/api/items",
+    },
+  });
 });
 
 mongoose
@@ -22,19 +34,9 @@ mongoose
     process.exit(1);
   });
 
+app.get("/api/health", (req, res) => {
+  res.json({ message: "Server is running." });
+});
+
 app.use("/api/items", itemRoutes);
-
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
-
-app.get("/", (req, res) => {
-  res.json({ 
-    message: "Donations API Server", 
-    endpoints: {
-      health: "/api/health",
-      donations: "/api/donations"
-    }
-  });
-});
+ 
