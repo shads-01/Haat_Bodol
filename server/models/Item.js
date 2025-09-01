@@ -1,4 +1,3 @@
-import { Factory } from "lucide-react";
 import mongoose from "mongoose";
 
 const itemSchema = new mongoose.Schema(
@@ -36,5 +35,6 @@ const itemSchema = new mongoose.Schema(
 },
   {timestamps: true},
 );
+
 const Item = mongoose.model("Item", itemSchema);
 export default Item;
