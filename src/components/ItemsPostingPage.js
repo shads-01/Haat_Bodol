@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 
 function ItemsPostingPage() {
   const [loading, setLoading] = useState(false);
-  const [photos, setPhotos] = useState([null, null, null, null]); // Keep as array
+  const [photos, setPhotos] = useState([null, null, null, null]);
 
   const navigate = useNavigate();
 
@@ -59,7 +59,7 @@ function ItemsPostingPage() {
     const loadingToast = toast.loading("Adding your item...");
 
     try {
-      const formDataObj = new FormData();
+      const formDataObj = new FormData(); //Form Data object
 
       Object.entries(formData).forEach(([key, value]) => {
         formDataObj.append(key, value);
@@ -71,7 +71,6 @@ function ItemsPostingPage() {
         }
       });
 
-      // Send the FormData object (not formData!)
       await axios.post("http://localhost:5000/api/items", formDataObj);
 
       toast.dismiss(loadingToast);
@@ -85,7 +84,7 @@ function ItemsPostingPage() {
         condition: "",
         address: "",
       });
-      setPhotos([null, null, null, null]); // Reset photos too
+      setPhotos([null, null, null, null]); // Reset photos
 
       navigate("/donations");
     } catch (error) {

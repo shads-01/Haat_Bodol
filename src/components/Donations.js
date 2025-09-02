@@ -23,13 +23,11 @@ function Donations() {
 
   const handleClose = () => setShow(false);
   const toggleShow = () => setShow((s) => !s);
-  //const totalProducts = Array(8).fill(0);
 
-  // ✅ Fetch data from API
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/items"); // 🔁 Change this if backend URL is different
+        const res = await axios.get("http://localhost:5000/api/items");
         setItems(res.data);
       } catch (err) {
         console.error("Error fetching items:", err);
@@ -209,7 +207,14 @@ function Donations() {
                   className="product-card shadow-sm h-100"
                   style={{ width: "100%", maxWidth: "300px" }}
                 >
-                  <Card.Img variant="top" src="https://placehold.co/600x400" />
+                  <Card.Img
+                    variant="top"
+                    src={
+                      item.photos[0]?
+                         `http://localhost:5000${item.photos[0]}`
+                        : "https://placehold.co/600x400"
+                    }
+                  />
                   <Card.Body className="d-flex flex-column">
                     <div className="pb-2 flex-grow-1">
                       <Card.Title className="h5 mb-2">{item.title}</Card.Title>
