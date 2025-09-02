@@ -2,6 +2,7 @@
   "name": "haat_bodol",
   "version": "0.1.0",
   "private": true,
+  "proxy": "http://localhost:5000",
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
@@ -21,6 +22,7 @@
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.8.1",
     "react-scripts": "5.0.1",
+    "react-toastify": "^11.0.5",
     "styled-components": "^6.1.19",
     "web-vitals": "^2.1.4"
   },
