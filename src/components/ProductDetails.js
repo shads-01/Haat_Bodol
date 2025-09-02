@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom";
 import { Container, Card, Row, Col, Badge } from "react-bootstrap";
 import NavigationBar from "./NavigationBar";
 import { Clock, MapPin } from "lucide-react";
-import { Category } from "@mui/icons-material";
 
 function ProductDetails() {
   const { id } = useParams(); 
