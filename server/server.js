@@ -3,6 +3,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import itemRoutes from "./routes/items.js";
+import authRoutes from "./routes/auth.js"
+import reviewsRoutes from "./routes/reviews.js";
 
 dotenv.config();
 const app = express();
@@ -22,6 +24,8 @@ app.get("/", (req, res) => {
     endpoints: {
       health: "/api/health",
       donations: "/api/items",
+      auth: "/api/auth",
+      reviews: "/api/reviews"
     },
   });
 });
@@ -39,4 +43,5 @@ app.get("/api/health", (req, res) => {
 });
 
 app.use("/api/items", itemRoutes);
- 
+app.use('/api/auth', authRoutes);
+app.use('/api/reviews', reviewsRoutes);
