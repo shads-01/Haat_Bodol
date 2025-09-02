@@ -1,4 +1,6 @@
-import { React, useState } from "react";
+import { Link } from "react-router-dom";
+import { React, useState, useEffect } from "react";
+import axios from "axios";
 import NavigationBar from "./NavigationBar";
 import "../css/Donations.css";
 import {
@@ -17,11 +19,26 @@ import { Clock, MapPin, SlidersHorizontal, ArrowUpDown } from "lucide-react";
 
 function Donations() {
   const [show, setShow] = useState(false);
+  const [items, setItems] = useState([]);
 
   const handleClose = () => setShow(false);
   const toggleShow = () => setShow((s) => !s);
-  const totalProducts = Array(8).fill(0);
-  
+  //const totalProducts = Array(8).fill(0);
+
+  // ✅ Fetch data from API
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/items"); // 🔁 Change this if backend URL is different
+        setItems(res.data);
+      } catch (err) {
+        console.error("Error fetching items:", err);
+      }
+    };
+
+    fetchItems();
+  }, []);
+
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "rgb(243,238,230)" }}>
       <NavigationBar />
@@ -148,11 +165,20 @@ function Donations() {
                     />
                   </div>
                   {/* Apply / Clear Buttons */}
-                  <div className="mt-auto d-flex justify-content-between ac-btn">
+                  {/* <div className="mt-auto d-flex justify-content-between ac-btn">
                     <Button variant="secondary" size="sm" onClick={() => {}}>
                       Clear All
                     </Button>
                     <Button variant="dark" size="sm" onClick={() => {}}>
+                      Apply Filters
+                    </Button>
+                  </div> */}
+
+                  <div className="mt-auto d-flex justify-content-between ac-btn">
+                    <Button variant="secondary" size="sm">
+                      Clear All
+                    </Button>
+                    <Button variant="dark" size="sm">
                       Apply Filters
                     </Button>
                   </div>
@@ -161,54 +187,73 @@ function Donations() {
             </div>
           </Col>
         </Row>
-        
+
         {/* Responsive card grid */}
-        <Row className="g-3 g-md-4 my-2">
-          {totalProducts.map((__, index) => (
-            <Col 
+        <Row className="g-2 g-md-4 my-2">
+          {items.map((item, index) => (
+            <Col
               key={index}
-              xs={12} 
-              sm={6} 
-              md={4} 
-              lg={3} 
-              xl={3} 
+              xs={12}
+              sm={6}
+              md={4}
+              lg={3}
+              xl={3}
               xxl={3}
               className="d-flex justify-content-center mb-3"
             >
-              <Card
-                className="product-card shadow-sm h-100"
-                style={{ width: "100%", maxWidth: "280px" }}
+              <Link
+                to={`/product/${item._id}`}
+                style={{ textDecoration: "none", color: "inherit" }}
               >
-                <Card.Img
-                  variant="top"
-                  src="https://placehold.co/600x400"
-                />
-                <Card.Body className="d-flex flex-column">
-                  <div className="pb-2 flex-grow-1">
-                    <Card.Title className="h5 mb-2">Product Name</Card.Title>
-                    <Card.Text className="text-muted small mb-2">
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    </Card.Text>
-                  </div>
-                  <div className="d-flex align-items-center justify-content-between border-top pt-2 mt-auto">
-                    <div className="text-muted d-flex flex-column">
-                      <div className="d-flex align-items-center mb-1">
-                        <Clock size={14} className="me-2" />
-                        <small>2 hours ago</small>
+                <Card
+                  className="product-card shadow-sm h-100"
+                  style={{ width: "100%", maxWidth: "300px" }}
+                >
+                  <Card.Img variant="top" src="https://placehold.co/600x400" />
+                  <Card.Body className="d-flex flex-column">
+                    <div className="pb-2 flex-grow-1">
+                      <Card.Title className="h5 mb-2">{item.title}</Card.Title>
+                      <Card.Text className="text-muted small mb-2">
+                        {item.description?.slice(0, 60)}...
+                      </Card.Text>
+                    </div>
+                    <div className="d-flex align-items-center justify-content-between border-top pt-2 mt-auto">
+                      <div className="text-muted d-flex flex-column mx-1">
+                        <div className="d-flex align-items-center mb-1">
+                          <Clock size={14} className="me-2" />
+                          <small>
+                            {new Date(item.createdAt).toLocaleString()}
+                          </small>
+                        </div>
+                        <div className="d-flex align-items-start">
+                          <MapPin
+                            size={14}
+                            className="me-2 flex-shrink-0 mt-1"
+                          />
+                          <small
+                            className="flex-grow-1 text-break"
+                            style={{
+                              lineHeight: "1.2",
+                              maxWidth: "150px", // Adjust based on your card width
+                            }}
+                          >
+                            {item.address}
+                          </small>
+                        </div>
                       </div>
-                      <div className="d-flex align-items-center">
-                        <MapPin size={14} className="me-2" />
-                        <small>Dhaka</small>
+                      <div>
+                        <Badge
+                          pill
+                          bg={item.reserved ? "info" : "secondary"}
+                          className="small"
+                        >
+                          {item.reserved ? "Reserved" : "Not Reserved"}
+                        </Badge>
                       </div>
                     </div>
-                    <div>
-                      <Badge pill bg="info" className="small">
-                        Reserved
-                      </Badge>
-                    </div>
-                  </div>
-                </Card.Body>
-              </Card>
+                  </Card.Body>
+                </Card>
+              </Link>
             </Col>
           ))}
         </Row>
