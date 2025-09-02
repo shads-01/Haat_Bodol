@@ -2,9 +2,14 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
-import itemRoutes from "./routes/items.js";
+import itemRoutes from "./routes/itemRoutes.js";
 import authRoutes from "./routes/auth.js"
 import reviewsRoutes from "./routes/reviews.js";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 const app = express();
@@ -45,3 +50,4 @@ app.get("/api/health", (req, res) => {
 app.use("/api/items", itemRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/reviews', reviewsRoutes);
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));

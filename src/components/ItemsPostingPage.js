@@ -4,11 +4,12 @@ import NavigationBar from "./NavigationBar";
 import "../css/PostItem.css";
 import PhotoUploadBox from "./PhotoUploadBox";
 import axios from "axios";
-import { ToastContainer, toast } from "react-toastify";
+import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 function ItemsPostingPage() {
   const [loading, setLoading] = useState(false);
+  const [photos, setPhotos] = useState([null, null, null, null]);
 
   const navigate = useNavigate();
 
@@ -20,6 +21,26 @@ function ItemsPostingPage() {
     address: "",
   });
 
+  const validateForm = () => {
+    if (!formData.title.trim()) {
+      toast.error("Please enter a title for your item");
+      return false;
+    }
+    if (!formData.category) {
+      toast.error("Please choose a category");
+      return false;
+    }
+    if (!formData.condition) {
+      toast.error("Please select the item condition");
+      return false;
+    }
+    if (!formData.address.trim()) {
+      toast.error("Please enter your location");
+      return false;
+    }
+    return true;
+  };
+
   const handleInput = (key, value) => {
     setFormData((prev) => ({
       ...prev,
@@ -30,14 +51,32 @@ function ItemsPostingPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!validateForm()) {
+      return;
+    }
+
     setLoading(true);
+    const loadingToast = toast.loading("Adding your item...");
+
     try {
-      await axios.post("http://localhost:5000/api/items", formData);
+      const formDataObj = new FormData(); //Form Data object
 
-      //Added alert
-      toast.success("Item Added successfully!");
+      Object.entries(formData).forEach(([key, value]) => {
+        formDataObj.append(key, value);
+      });
 
-      //Reset formData
+      photos.forEach((file) => {
+        if (file) {
+          formDataObj.append("itemPhotos", file);
+        }
+      });
+
+      await axios.post("http://localhost:5000/api/items", formDataObj);
+
+      toast.dismiss(loadingToast);
+      toast.success("Item added successfully!");
+
+      // Reset form
       setFormData({
         title: "",
         description: "",
@@ -45,11 +84,13 @@ function ItemsPostingPage() {
         condition: "",
         address: "",
       });
+      setPhotos([null, null, null, null]); // Reset photos
 
       navigate("/donations");
     } catch (error) {
+      toast.dismiss(loadingToast);
       toast.error("Couldn't add the item!");
-      console.log("Error adding item.", error);
+      console.log("Error adding item:", error);
     } finally {
       setLoading(false);
     }
@@ -80,7 +121,6 @@ function ItemsPostingPage() {
                   type="text"
                   placeholder="A white sofa, Atomic habits..."
                   className="bg-light px-3 py-2"
-                  required
                   onChange={(e) => handleInput("title", e.target.value)}
                 />
               </div>
@@ -108,7 +148,6 @@ function ItemsPostingPage() {
                 </Form.Label>
                 <Form.Select
                   className="bg-light"
-                  required
                   onChange={(e) => handleInput("category", e.target.value)}
                 >
                   <option value="">Category</option>
@@ -129,31 +168,26 @@ function ItemsPostingPage() {
                   Condition of your item
                 </Form.Label>
                 <div>
-                  {["like-new", "good", "used", "broken"].map(
-                    (condition) => (
-                      <Form.Check
-                        key={condition}
-                        type="radio"
-                        id={condition}
-                        name="condition"
-                        value={condition}
-                        label={
-                          condition === "like-new"
-                            ? "Like New"
-                            : condition === "good"
-                            ? "Good condition"
-                            : condition === "used"
-                            ? "Used"
-                            : "Broken"
-                        }
-                        className="mb-2"
-                        required
-                        onChange={(e) =>
-                          handleInput("condition", e.target.value)
-                        }
-                      />
-                    )
-                  )}
+                  {["like-new", "good", "used", "broken"].map((condition) => (
+                    <Form.Check
+                      key={condition}
+                      type="radio"
+                      id={condition}
+                      name="condition"
+                      value={condition}
+                      label={
+                        condition === "like-new"
+                          ? "Like New"
+                          : condition === "good"
+                          ? "Good condition"
+                          : condition === "used"
+                          ? "Used"
+                          : "Broken"
+                      }
+                      className="mb-2"
+                      onChange={(e) => handleInput("condition", e.target.value)}
+                    />
+                  ))}
                 </div>
               </div>
 
@@ -161,9 +195,15 @@ function ItemsPostingPage() {
               <div className="form-container mb-4">
                 <Form.Label className="fw-semibold">Add photos</Form.Label>
                 <Row className="g-3">
-                  {[...Array(4).fill(null)].map((_, index) => (
+                  {photos.map((photo, index) => (
                     <Col xs={6} md={4} lg={3} key={index}>
-                      <PhotoUploadBox />
+                      <PhotoUploadBox
+                        onChange={(file) => {
+                          const newPhotos = [...photos]; // Keep as array
+                          newPhotos[index] = file;
+                          setPhotos(newPhotos);
+                        }}
+                      />
                     </Col>
                   ))}
                 </Row>
@@ -185,7 +225,6 @@ function ItemsPostingPage() {
                   type="text"
                   placeholder="Enter an address"
                   className="bg-light px-3 py-2"
-                  required
                   onChange={(e) => handleInput("address", e.target.value)}
                 />
                 <div className="fs-6 text-center my-2 fw-semibold">or</div>
