@@ -163,15 +163,6 @@ function Donations() {
                     />
                   </div>
                   {/* Apply / Clear Buttons */}
-                  {/* <div className="mt-auto d-flex justify-content-between ac-btn">
-                    <Button variant="secondary" size="sm" onClick={() => {}}>
-                      Clear All
-                    </Button>
-                    <Button variant="dark" size="sm" onClick={() => {}}>
-                      Apply Filters
-                    </Button>
-                  </div> */}
-
                   <div className="mt-auto d-flex justify-content-between ac-btn">
                     <Button variant="secondary" size="sm">
                       Clear All
@@ -210,8 +201,8 @@ function Donations() {
                   <Card.Img
                     variant="top"
                     src={
-                      item.photos[0]?
-                         `http://localhost:5000${item.photos[0]}`
+                      item.photos[0]
+                        ? `${item.photos[0].url}`
                         : "https://placehold.co/600x400"
                     }
                   />
