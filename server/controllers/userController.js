@@ -1,6 +1,7 @@
 import User from '../models/user.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import toast from 'react-hot-toast';
 
 // Register a new user
 const register = async (req, res) => {

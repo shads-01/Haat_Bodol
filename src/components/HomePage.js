@@ -234,7 +234,7 @@ function HomePage() {
                 xxl={3}
                 className="d-flex justify-content-center mb-4"
               >
-                <Card className="shadow-sm" style={{ width: "100%" }}>
+                <Card className="shadow-sm" style={{ width: "100%", cursor: "pointer" }}>
                   <Card.Img variant="top" src={cat.image} height={150} />
                   <Card.Body>
                     <Card.Title>{cat.name}</Card.Title>

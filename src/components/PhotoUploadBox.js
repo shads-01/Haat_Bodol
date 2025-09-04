@@ -53,7 +53,7 @@ function PhotoUploadBox({ onChange }) {
               e.stopPropagation();
               handleRemove();
             }}
-            className="position-absolute top-0 end-0 btn-sm  rounded-circle"
+            className="position-absolute top-0 end-0 btn-sm rounded-circle"
           >
             <X size={15} />
           </Button>
