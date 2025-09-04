@@ -31,10 +31,12 @@ const itemSchema = new mongoose.Schema(
       required: true,
       default: "used",
     },
-    photos: {
-      type: [String],
-      default: [],
-    },
+    photos: [
+      {
+        url: String,
+        public_id: String,
+      },
+    ],
     address: {
       type: String,
       required: true,
@@ -50,5 +52,3 @@ const itemSchema = new mongoose.Schema(
 
 const Item = mongoose.model("Item", itemSchema);
 export default Item;
-
-

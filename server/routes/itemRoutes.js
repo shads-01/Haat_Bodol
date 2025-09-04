@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { createAnItem, getAllItems } from "../controllers/itemsControllers.js";
 import multer from "multer";
+import { v2 as cloudinary } from 'cloudinary';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
 
 const router = Router();
 
@@ -9,17 +11,20 @@ router.get("/", getAllItems);
 
 
 //Multer setup
-const storage = multer.diskStorage({
-    destination: (req,file, cb) => {
-        cb(null, 'uploads/items');
-    },
-    filename: (req, file, cb) => {
-        const suffix = Date.now();
-        cb(null, suffix + '-' + file.originalname);
-    }
-})
 
-//Multer filter for image files only
+//CloudinaryStorage setup
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'items',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+    public_id: (req, file) => {
+      const suffix = Date.now();
+      return `${suffix}-${file.originalname.split('.')[0]}`;
+    }
+  },
+});
+
 const fileFilter = (req, file, cb) => {
   if (file.mimetype.startsWith("image/")) {
     cb(null, true);
@@ -31,10 +36,9 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 1024 * 1024 * 5 }, //limit each image to 5MB
+  limits: { fileSize: 1024 * 1024 * 5 },
 });
 
 router.post("/", upload.array("itemPhotos", 4), createAnItem);
-
 
 export default router;

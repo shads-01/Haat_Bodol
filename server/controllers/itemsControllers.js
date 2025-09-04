@@ -13,9 +13,11 @@ export async function createAnItem(req, res) {
   try {
     const { title, description, category, condition, address } = req.body;
 
-
     const photoPaths = req.files
-      ? req.files.map((file) => `/uploads/items/${file.filename}`)
+      ? req.files.map((file) => ({
+          url: file.path,
+          public_id: file.filename
+        }))
       : [];
 
     const item = await Item.create({
