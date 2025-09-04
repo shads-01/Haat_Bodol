@@ -1,19 +1,32 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Camera, X } from "lucide-react";
 import "../css/PostItem.css";
 import { Button } from "react-bootstrap";
 
-function PhotoUploadBox({ onChange }) {
+function PhotoUploadBox({ photo, onChange }) {
   const [image, setImage] = useState(null);
-
   const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    if (photo) {
+      const previewUrl = URL.createObjectURL(photo);
+      setImage(previewUrl);
+    } else {
+      setImage(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+    return () => {
+      if (image) {
+        URL.revokeObjectURL(image);
+      }
+    };
+  }, [photo]);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const previewUrl = URL.createObjectURL(file);
-      setImage(previewUrl);
-
       if (onChange) onChange(file);
     }
   };
@@ -37,10 +50,9 @@ function PhotoUploadBox({ onChange }) {
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*"
+        accept="image/webp,image/jpeg,image/jpg,image/png"
         onChange={handleImageChange}
         style={{ display: "none" }}
-        multiple
         name="itemPhotos"
       />
 

@@ -21,21 +21,53 @@ function ItemsPostingPage() {
     address: "",
   });
 
+  const validateImage = (file) => {
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    const maxSize = 5 * 1024 * 1024;
+
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Only image files (JPEG, JPG, PNG, WebP) are allowed!");
+      return false;
+    }
+
+    if (file.size > maxSize) {
+      toast.error("Image size must be less than 5MB!");
+      return false;
+    }
+
+    return true;
+  };
+
+  const handlePhotoChange = (file, index) => {
+    if (file && !validateImage(file)) {
+      return;
+    }
+
+    const newPhotos = [...photos];
+    newPhotos[index] = file;
+    setPhotos(newPhotos);
+  };
   const validateForm = () => {
     if (!formData.title.trim()) {
-      toast.error("Please enter a title for your item");
+      toast.error("Please enter a title for your item!");
       return false;
     }
     if (!formData.category) {
-      toast.error("Please choose a category");
+      toast.error("Please choose a category!");
       return false;
     }
     if (!formData.condition) {
-      toast.error("Please select the item condition");
+      toast.error("Please select the item condition!");
       return false;
     }
     if (!formData.address.trim()) {
-      toast.error("Please enter your location");
+      toast.error("Please enter your location!");
+      return false;
+    }
+
+    const hasPhotos = photos.some((photo) => photo !== null);
+    if (!hasPhotos) {
+      toast.error("Please add at least one photo of your item!");
       return false;
     }
     return true;
@@ -59,12 +91,14 @@ function ItemsPostingPage() {
     const loadingToast = toast.loading("Adding your item...");
 
     try {
-      const formDataObj = new FormData(); //Form Data object
+      const formDataObj = new FormData();
 
+      // Add form fields
       Object.entries(formData).forEach(([key, value]) => {
         formDataObj.append(key, value);
       });
 
+      // Add photos
       photos.forEach((file) => {
         if (file) {
           formDataObj.append("itemPhotos", file);
@@ -84,7 +118,7 @@ function ItemsPostingPage() {
         condition: "",
         address: "",
       });
-      setPhotos([null, null, null, null]); // Reset photos
+      setPhotos([null, null, null, null]);
 
       navigate("/donations");
     } catch (error) {
@@ -198,11 +232,8 @@ function ItemsPostingPage() {
                   {photos.map((photo, index) => (
                     <Col xs={6} md={4} lg={3} key={index}>
                       <PhotoUploadBox
-                        onChange={(file) => {
-                          const newPhotos = [...photos]; // Keep as array
-                          newPhotos[index] = file;
-                          setPhotos(newPhotos);
-                        }}
+                        photo={photo}
+                        onChange={(file) => handlePhotoChange(file, index)}
                       />
                     </Col>
                   ))}
