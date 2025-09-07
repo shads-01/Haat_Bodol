@@ -16,6 +16,7 @@ import {
   Form,
 } from "react-bootstrap";
 import { Clock, MapPin, SlidersHorizontal, ArrowUpDown } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
 
 function Donations() {
   const [show, setShow] = useState(false);
@@ -191,7 +192,8 @@ function Donations() {
               className="d-flex justify-content-center mb-3"
             >
               <Link
-                to={`/product/${item._id}`}
+                key={item._id}
+                to={`/item/${item._id}`}
                 style={{ textDecoration: "none", color: "inherit" }}
               >
                 <Card
@@ -215,22 +217,24 @@ function Donations() {
                     </div>
                     <div className="d-flex align-items-center justify-content-between border-top pt-2 mt-auto">
                       <div className="text-muted d-flex flex-column mx-1">
-                        <div className="d-flex align-items-center mb-1">
-                          <Clock size={14} className="me-2" />
+                        <div className="d-flex align-items-center mb-2">
+                          <Clock size={16} className="me-2" />
                           <small>
-                            {new Date(item.createdAt).toLocaleString()}
+                            {formatDistanceToNow(new Date(item.createdAt), {
+                              addSuffix: true,
+                            })}{" "}
                           </small>
                         </div>
                         <div className="d-flex align-items-start">
                           <MapPin
-                            size={14}
+                            size={16}
                             className="me-2 flex-shrink-0 mt-1"
                           />
                           <small
                             className="flex-grow-1 text-break"
                             style={{
                               lineHeight: "1.2",
-                              maxWidth: "150px", // Adjust based on your card width
+                              maxWidth: "150px",
                             }}
                           >
                             {item.address}
@@ -240,10 +244,20 @@ function Donations() {
                       <div>
                         <Badge
                           pill
-                          bg={item.reserved ? "info" : "secondary"}
+                          bg={
+                            item.status === "available"
+                              ? "success"
+                              : item.status === "reserved"
+                              ? "info"
+                              : "dark"
+                          }
                           className="small"
                         >
-                          {item.reserved ? "Reserved" : "Not Reserved"}
+                          {item.status === "available"
+                            ? "Available"
+                            : item.status === "reserved"
+                            ? "Reserved"
+                            : "Donated"}
                         </Badge>
                       </div>
                     </div>

@@ -42,9 +42,10 @@ const itemSchema = new mongoose.Schema(
       required: true,
     },
     //createdBy --> user id
-    reserved: {
-      type: Boolean,
-      default: false,
+    status: {
+      type: String,
+      enum: ["available", "reserved", "donated"],
+      default: "available",
     },
   },
   { timestamps: true }

@@ -16,7 +16,7 @@ export async function createAnItem(req, res) {
     const photoPaths = req.files
       ? req.files.map((file) => ({
           url: file.path,
-          public_id: file.filename
+          public_id: file.filename,
         }))
       : [];
 
@@ -32,5 +32,16 @@ export async function createAnItem(req, res) {
     res.status(201).json(item);
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+}
+
+export async function getItemById(req, res) {
+  try {
+    const item = await Item.findById(req.params.id);
+
+    if (!item) return res.status(404).json({ error: "Item not found" });
+        res.json(item);
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
   }
 }

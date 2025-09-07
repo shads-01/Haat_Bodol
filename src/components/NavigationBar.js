@@ -26,9 +26,7 @@ function NavigationBar() {
           <Row className="w-100 d-flex align-items-center justify-content-between">
             <Col xs="auto" className="d-flex align-items-center">
               <NavLink to="/donations" className="py-1 px-4">
-                {/* <img src="logo.jpg" alt="logo" width={100} height={60} /> */}
-                <img src={`${process.env.PUBLIC_URL}/logo.jpg`} alt="Logo" width={100} height={60} />
-
+                <img src="/logo.jpg" alt="logo" width={100} height={60} />
               </NavLink>
             </Col>
 
@@ -70,20 +68,12 @@ function NavigationBar() {
                 </NavLink>
                 <NavLink to="/profile" className="nav-link">
                   <img
-                    src="placeholder.png"
+                    src="/placeholder.png"
                     alt="Profile picture"
                     className="rounded-circle border border-2 border-black"
                     width={50}
                     height={50}
                   />
-                  {/* <img 
-                    src={`${process.env.PUBLIC_URL}/placeholder.png`} 
-                    alt="Profile picture" 
-                    width={50} 
-                    height={50} 
-                    style={{ borderRadius: "50%" }} 
-                  /> */}
-
                 </NavLink>
               </Nav>
             </Col>
@@ -96,7 +86,7 @@ function NavigationBar() {
                 onClick={handleClose}
               >
                 <img
-                  src="placeholder.png"
+                  src="/placeholder.png"
                   alt="Profile picture"
                   className="rounded-circle border border-2 border-black"
                   width={40}

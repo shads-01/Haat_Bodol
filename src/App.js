@@ -5,7 +5,7 @@ import HomePage from "./components/HomePage";
 import Profile from "./components/Profile";
 import ItemsPostingPage from "./components/ItemsPostingPage";
 import { Toaster } from "react-hot-toast";
-import ProductDetails from "./components/ProductDetails";
+import ItemDetails from "./components/ItemDetails";
 
 function App() {
   return (
@@ -18,7 +18,7 @@ function App() {
           <Route path="/donations" element={<Donations />} />
           <Route path="/post-item" element={<ItemsPostingPage />}/>
           <Route path="/profile" element={<Profile />} />
-          <Route path="/product/:id" element={<ProductDetails />} />
+          <Route path="/item/:id" element={<ItemDetails />} />
         </Routes>
       </BrowserRouter>
       <Toaster />

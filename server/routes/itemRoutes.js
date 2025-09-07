@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createAnItem, getAllItems } from "../controllers/itemsControllers.js";
+import { createAnItem, getAllItems, getItemById } from "../controllers/itemsControllers.js";
 import multer from "multer";
 import { v2 as cloudinary } from 'cloudinary';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
@@ -9,9 +9,10 @@ const router = Router();
 // GET all items
 router.get("/", getAllItems);
 
+router.get('/:id', getItemById);
+
 
 //Multer setup
-
 //CloudinaryStorage setup
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
