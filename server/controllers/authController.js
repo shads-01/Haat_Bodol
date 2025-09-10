@@ -1,4 +1,5 @@
 import User from '../models/user.js';
+import Review from '../models/review.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import toast from 'react-hot-toast';
