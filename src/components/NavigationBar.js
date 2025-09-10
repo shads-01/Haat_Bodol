@@ -1,4 +1,6 @@
 import { React, useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import "../css/Navbar.css";
 import {
   Navbar,
@@ -15,10 +17,47 @@ import { NavLink } from "react-router-dom";
 import { MessageSquareText, Bell, Search, Menu } from "lucide-react";
 
 function NavigationBar() {
+  const [searchTerm, setSearchTerm] = useState("");
+const [searchResults, setSearchResults] = useState([]);
+const navigate = useNavigate();
+
   const [showOffcanvas, setShowOffcanvas] = useState(false);
 
   const handleClose = () => setShowOffcanvas(false);
   const handleShow = () => setShowOffcanvas(true);
+
+  const handleSearchChange = async (e) => {
+  const value = e.target.value;
+  setSearchTerm(value);
+
+  if (value.trim() === "") {
+    setSearchResults([]);
+    return;
+  }
+
+  try {
+    const res = await axios.get(
+  `http://localhost:5000/api/items/search?query=${encodeURIComponent(value)}`
+);
+
+
+
+    setSearchResults(res.data);
+  } catch (error) {
+    console.error("Search error:", error);
+    setSearchResults([]);
+  }
+};
+
+const handleSearchSubmit = (e) => {
+  e.preventDefault(); // Prevent page refresh
+  if (!searchTerm.trim()) return;
+
+  navigate(`/donations?query=${encodeURIComponent(searchTerm)}`);
+  setSearchResults([]); // Clear dropdown
+};
+
+
   return (
     <>
       <Navbar data-bs-theme="light" sticky="top" className="navbar shadow-md">
@@ -34,14 +73,18 @@ function NavigationBar() {
 
             {/* Desktop search bar - hidden on mobile */}
             <Col className="d-none d-lg-flex justify-content-center">
-              <Form className="w-100" style={{ maxWidth: "500px" }}>
+            <div style={{ position: "relative", width: "100%", maxWidth: "500px" }}>
+              <Form className="w-100" onSubmit={handleSearchSubmit}>
                 <InputGroup className="searchbox">
                   <Form.Control
                     type="search"
                     placeholder="Search"
                     className="search-input border-1 border-black "
+                    value={searchTerm}
+                    onChange={handleSearchChange}
                   />
                   <Button
+                  type="submit"
                     variant="dark"
                     className="search-btn py-0 border-2 border-black"
                   >
@@ -49,6 +92,38 @@ function NavigationBar() {
                   </Button>
                 </InputGroup>
               </Form>
+
+              {/* Search results dropdown */}
+              {searchTerm.trim() !== "" && (
+            <div
+              className="search-dropdown bg-white border p-2 mt-1 rounded shadow"
+              style={{
+                position: "absolute",
+                zIndex: 1000,
+                width: "100%",
+                maxHeight: "300px",
+                overflowY: "auto",
+                top: "100%",
+                left: 0,
+              }}
+            >
+              {searchResults.length > 0 ? (
+                searchResults.map((item) => (
+                  <div
+                    key={item._id}
+                    className="search-result-item py-1 px-2"
+                    onClick={() => navigate(`/item/${item._id}`)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    {item.title}
+                  </div>
+                ))
+              ) : (
+                <div className="text-muted">No items found</div>
+              )}
+            </div>
+          )}
+            </div>
             </Col>
 
             {/* desktop navigation - hidden on mobile */}
@@ -165,13 +240,15 @@ function NavigationBar() {
       </Offcanvas>
 
       {/* mobile search bar */}
-      <Row className="d-lg-none d-flex justify-content-center mt-3" style={{marginBottom: '-10px'}}>
+      {/* <Row className="d-lg-none d-flex justify-content-center mt-3" style={{marginBottom: '-10px'}}>
         <Form className="w-100" style={{ maxWidth: "90%" }}>
           <InputGroup className="searchbox bg-light">
             <Form.Control
               type="search"
               placeholder="Search"
               className="search-input border-1 border-black"
+              value={searchTerm}
+              onChange={handleSearchChange}
             />
             <Button
               variant="dark"
@@ -181,7 +258,63 @@ function NavigationBar() {
             </Button>
           </InputGroup>
         </Form>
-      </Row>
+      </Row> */}
+
+      {/* mobile search bar */}
+<Row className="d-lg-none d-flex justify-content-center mt-3 position-relative" style={{ marginBottom: '-10px' }}>
+  <div style={{ width: "90%", position: "relative" }}>
+    <Form className="w-100" onSubmit={handleSearchSubmit}>
+      <InputGroup className="searchbox bg-light">
+        <Form.Control
+          type="search"
+          placeholder="Search"
+          className="search-input border-1 border-black"
+          value={searchTerm}
+          onChange={handleSearchChange}
+        />
+        <Button
+        type="submit"
+          variant="dark"
+          className="search-btn py-0 border border-black"
+        >
+          <Search size={18} />
+        </Button>
+      </InputGroup>
+    </Form>
+
+    {/* Mobile dropdown suggestion */}
+    {searchTerm.trim() !== "" && (
+      <div
+        className="search-dropdown bg-white border p-2 mt-1 rounded shadow"
+        style={{
+          position: "absolute",
+          top: "100%",
+          left: 0,
+          width: "100%",
+          zIndex: 999,
+          maxHeight: "250px",
+          overflowY: "auto",
+        }}
+      >
+        {searchResults.length > 0 ? (
+          searchResults.map((item) => (
+            <div
+              key={item._id}
+              className="search-result-item py-1 px-2"
+              onClick={() => navigate(`/item/${item._id}`)}
+              style={{ cursor: "pointer" }}
+            >
+              {item.title}
+            </div>
+          ))
+        ) : (
+          <div className="text-muted">No items found</div>
+        )}
+      </div>
+    )}
+  </div>
+</Row>
+
     </>
   );
 }
