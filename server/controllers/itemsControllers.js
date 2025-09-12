@@ -1,13 +1,33 @@
 import Item from "../models/Item.js";
 
+// export async function getAllItems(req, res) {
+//   try {
+//     const items = await Item.find();
+//     res.json(items);
+//   } catch (err) {
+//     res.status(500).json({ error: err.message });
+//   }
+// }
+
 export async function getAllItems(req, res) {
   try {
-    const items = await Item.find();
+    const { category } = req.query;
+
+    const filter = {};
+
+    if (category && category.trim() !== "") {
+      filter.category = category.trim();
+    }
+
+    // const items = await Item.find(filter).sort({ createdAt: -1 });
+    const items = await Item.find(filter);
+
     res.json(items);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 }
+
 export async function createAnItem(req, res) {
   try {
     const { title, description, category, condition, address } = req.body;
