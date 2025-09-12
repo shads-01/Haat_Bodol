@@ -17,6 +17,7 @@ import {
 } from "react-bootstrap";
 import { Clock, MapPin, SlidersHorizontal, ArrowUpDown } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { useLocation } from "react-router-dom";
 
 function Donations() {
   const [show, setShow] = useState(false);
@@ -25,10 +26,21 @@ function Donations() {
   const handleClose = () => setShow(false);
   const toggleShow = () => setShow((s) => !s);
 
+  const location = useLocation();
+
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/items");
+        const queryParams = new URLSearchParams(location.search);
+        const searchQuery = queryParams.get("query");
+
+        const url = searchQuery
+          ? `http://localhost:5000/api/items/search?query=${encodeURIComponent(
+              searchQuery
+            )}`
+          : `http://localhost:5000/api/items`;
+
+        const res = await axios.get(url);
         setItems(res.data);
       } catch (err) {
         console.error("Error fetching items:", err);
@@ -36,7 +48,7 @@ function Donations() {
     };
 
     fetchItems();
-  }, []);
+  }, [location.search]);
 
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "rgb(243,238,230)" }}>
@@ -266,6 +278,12 @@ function Donations() {
               </Link>
             </Col>
           ))}
+
+          {items.length === 0 && (
+            <div className="text-center my-5">
+              <h5>No items found for your search.</h5>
+            </div>
+          )}
         </Row>
       </Container>
     </div>

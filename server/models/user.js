@@ -52,5 +52,7 @@ userSchema.virtual('reviews', {
   localField: '_id',
   foreignField: 'userId'
 });
+userSchema.set('toObject', { virtuals: true });
+userSchema.set('toJSON', { virtuals: true });
 
 export default mongoose.model('User', userSchema);

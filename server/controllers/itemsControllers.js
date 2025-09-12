@@ -8,7 +8,6 @@ export async function getAllItems(req, res) {
     res.status(500).json({ error: err.message });
   }
 }
-
 export async function createAnItem(req, res) {
   try {
     const { title, description, category, condition, address } = req.body;
@@ -40,8 +39,31 @@ export async function getItemById(req, res) {
     const item = await Item.findById(req.params.id);
 
     if (!item) return res.status(404).json({ error: "Item not found" });
-        res.json(item);
+    res.json(item);
   } catch (err) {
     res.status(500).json({ error: "Server error" });
+  }
+}
+
+export async function searchItems(req, res) {
+  try {
+    const query = req.query.query;
+
+    if (!query || query.trim() === "") {
+      return res.status(400).json({ message: "Search query is required" });
+    }
+
+    const items = await Item.find({
+      $or: [
+        { title: { $regex: query, $options: "i" } },
+        { description: { $regex: query, $options: "i" } },
+        { category: { $regex: query, $options: "i" } },
+      ],
+    });
+
+    res.json(items);
+  } catch (error) {
+    console.error("Search error:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 }
