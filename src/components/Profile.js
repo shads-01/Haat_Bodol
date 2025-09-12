@@ -27,8 +27,6 @@ import {
   Cake,
   Save,
   Cancel,
-  PhotoCamera,
-  Person,
 } from "@mui/icons-material";
 import NavigationBar from "./NavigationBar";
 import ProfilePictureUploadBox from "./ProfilePictureUploadBox";
@@ -37,6 +35,7 @@ import toast from "react-hot-toast";
 const ProfilePage = () => {
   const [editMode, setEditMode] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [picLoading, setPicLoading] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -130,7 +129,7 @@ const ProfilePage = () => {
 
         setUserData({
           name: data.name || "User",
-          profilePic: data.profilePic?.url || "", // ✅ safe
+          profilePic: data.profilePic?.url || "",
           joinDate: joinDate,
           donations: data.donations || 0,
           claims: data.claims || 0,
@@ -299,10 +298,10 @@ const ProfilePage = () => {
     );
   }
   const onProfileImageChange = async (file, previewUrl) => {
-    const formData = new FormData();
-    formData.append("profilePhoto", file);
-
     try {
+      const formData = new FormData();
+      formData.append("profilePhoto", file);
+      setPicLoading(true);
       const res = await fetch(
         "http://localhost:5000/api/auth/profile/picture",
         {
@@ -320,6 +319,7 @@ const ProfilePage = () => {
         ...prev,
         profilePic: data.user.profilePic.url, // depends on your response
       }));
+      setPicLoading(false);
       toast.success("Successfully uploaded profile picture.");
     } catch (err) {
       console.error(err);
@@ -348,6 +348,7 @@ const ProfilePage = () => {
               <ProfilePictureUploadBox
                 currentImage={userData.profilePic || null}
                 onImageChange={onProfileImageChange}
+                uploading={picLoading}
                 size={150}
               />
             </Grid>
