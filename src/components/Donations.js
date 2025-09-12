@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { React, useState, useEffect } from "react";
 import axios from "axios";
-import NavigationBar from "./NavigationBar";
+
 import "../css/Donations.css";
 import {
   Container,
@@ -20,8 +20,10 @@ import { Clock, MapPin, SlidersHorizontal, ArrowUpDown } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useLocation } from "react-router-dom";
 import { Box, CircularProgress } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 function Donations() {
+  const navigate = useNavigate();
   const [show, setShow] = useState(false);
   const [items, setItems] = useState([]);
   const [isFetching, setIsFetching] = useState(true);
@@ -111,7 +113,7 @@ function Donations() {
               size="sm"
               className="lc-btn"
               onSelect={(selectedCategory) => {
-                window.location.href = `/donations?category=${selectedCategory}`;
+                navigate(`/donations?category=${selectedCategory}`);
               }}
             >
               <Dropdown.Item eventKey="">All</Dropdown.Item>

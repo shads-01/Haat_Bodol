@@ -2,25 +2,55 @@ import React from "react";
 import Carousel from "react-bootstrap/Carousel";
 import "../css/HomePage.css";
 import { Container, Card, Row, Col } from "react-bootstrap";
-import { Search, HeartHandshake, Send, ChevronRight, HandHeart, Leaf, Users, Rocket } from "lucide-react";
+import {
+  Search,
+  HeartHandshake,
+  Send,
+  ChevronRight,
+  HandHeart,
+  Leaf,
+  Users,
+  Rocket,
+} from "lucide-react";
 import Footer from "./Footer";
+import { useNavigate } from "react-router-dom";
 
 function HomePage() {
+  const navigate = useNavigate();
   const categories = [
-    { name: "Clothes", image: require("../assets/categories/clothes.jpg") },
-    { name: "Books", image: require("../assets/categories/books.jpg") },
-    { name: "Utensils", image: require("../assets/categories/utensils.jpg") },
+    {
+      name: "Clothes",
+      value: "clothes",
+      image: require("../assets/categories/clothes.jpg"),
+    },
+    {
+      name: "Books",
+      value: "books",
+      image: require("../assets/categories/books.jpg"),
+    },
+    {
+      name: "Utensils",
+      value: "utensils",
+      image: require("../assets/categories/utensils.jpg"),
+    },
     {
       name: "Electronics",
+      value: "electronics",
       image: require("../assets/categories/electronics.jpg"),
     },
     {
       name: "Furnitures",
+      value: "furnitures",
       image: require("../assets/categories/furnitures.jpg"),
     },
-    { name: "Toys", image: require("../assets/categories/toys.jpg") },
+    {
+      name: "Toys",
+      value: "toys",
+      image: require("../assets/categories/toys.jpg"),
+    },
     {
       name: "Appliances",
+      value: "appliances",
       image: require("../assets/categories/appliances.jpg"),
     },
   ];
@@ -234,7 +264,13 @@ function HomePage() {
                 xxl={3}
                 className="d-flex justify-content-center mb-4"
               >
-                <Card className="shadow-sm" style={{ width: "100%", cursor: "pointer" }}>
+                <Card
+                  className="shadow-sm"
+                  style={{ width: "100%", cursor: "pointer" }}
+                  onClick={() => {
+                    navigate(`/donations?category=${cat.value}`);
+                  }}
+                >
                   <Card.Img variant="top" src={cat.image} height={150} />
                   <Card.Body>
                     <Card.Title>{cat.name}</Card.Title>
