@@ -1,4 +1,4 @@
-import { React, useState } from "react";
+import { React, useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../css/Navbar.css";
@@ -27,6 +27,29 @@ function NavigationBar() {
 
   const handleClose = () => setShowOffcanvas(false);
   const handleShow = () => setShowOffcanvas(true);
+  const [profilePic, setProfilePic] = useState("placeholder.png");
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const { data } = await axios.get(
+          "http://localhost:5000/api/auth/profile",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        setProfilePic(data.profilePic?.url || null);
+      } catch (err) {
+        console.error("Error fetching profile pic:", err);
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   const handleSearchChange = async (e) => {
     const value = e.target.value;
@@ -176,7 +199,7 @@ function NavigationBar() {
                 </NavLink>
                 <NavLink to="/profile" className="nav-link">
                   <img
-                    src="/placeholder.png"
+                    src={profilePic}
                     alt="Profile picture"
                     className="rounded-circle border border-2 border-black"
                     width={50}
@@ -185,7 +208,6 @@ function NavigationBar() {
                 </NavLink>
               </Nav>
             </Col>
-
             {/* Mobile menu bar */}
             <Col className="d-lg-none d-flex align-items-center justify-content-end ms-auto">
               <NavLink
@@ -277,9 +299,7 @@ function NavigationBar() {
                 value={searchTerm}
                 onChange={handleSearchChange}
                 onFocus={() => setSearchFocused(true)}
-                onBlur={() =>
-                  setTimeout(() => setSearchFocused(false), 150)
-                }
+                onBlur={() => setTimeout(() => setSearchFocused(false), 150)}
               />
               {searchTerm && (
                 <Button
