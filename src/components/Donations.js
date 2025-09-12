@@ -19,10 +19,12 @@ import {
 import { Clock, MapPin, SlidersHorizontal, ArrowUpDown } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useLocation } from "react-router-dom";
+import {Box, CircularProgress} from "@mui/material";
 
 function Donations() {
   const [show, setShow] = useState(false);
   const [items, setItems] = useState([]);
+  const [isFetching, setIsFetching] = useState(true);
 
   const handleClose = () => setShow(false);
   const toggleShow = () => setShow((s) => !s);
@@ -55,10 +57,35 @@ function Donations() {
       } catch (err) {
         console.error("Error fetching items:", err);
       }
+      finally {
+        setIsFetching(false);
+      }
     };
 
     fetchItems();
   }, [location.search]);
+
+  if (isFetching) {
+    return (
+      <Box sx={{ backgroundColor: "#f3eee6", minHeight: "100vh" }}>
+        <NavigationBar />
+        <Container
+          maxWidth="lg"
+          sx={{
+            py: 4,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: "50vh",
+          }}
+          className="d-flex justify-content-center"
+          style={{marginTop:"20%"}}
+        >
+          <CircularProgress />
+        </Container>
+      </Box>
+    );
+  }
 
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "rgb(243,238,230)" }}>

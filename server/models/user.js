@@ -3,56 +3,59 @@ import mongoose from "mongoose";
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true
+    required: true,
   },
   email: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
   },
   password: {
     type: String,
-    required: true
+    required: true,
   },
   phone: {
     type: String,
-    default: ''
+    default: "",
   },
   address: {
     type: String,
-    default: ''
+    default: "",
   },
   dob: {
     type: String,
-    default: ''
+    default: "",
   },
   joinDate: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
   donations: {
     type: Number,
-    default: 0
+    default: 0,
   },
   claims: {
     type: Number,
-    default: 0
+    default: 0,
   },
   level: {
     type: String,
-    default: 'Bronze'
+    default: "Bronze",
   },
   rating: {
     type: Number,
-    default: 0
-  }
+    default: 0,
+  },
+  profilePic: {
+    url: String,
+  },
 });
-userSchema.virtual('reviews', {
-  ref: 'Review',
-  localField: '_id',
-  foreignField: 'userId'
+userSchema.virtual("reviews", {
+  ref: "Review",
+  localField: "_id",
+  foreignField: "userId",
 });
-userSchema.set('toObject', { virtuals: true });
-userSchema.set('toJSON', { virtuals: true });
+userSchema.set("toObject", { virtuals: true });
+userSchema.set("toJSON", { virtuals: true });
 
-export default mongoose.model('User', userSchema);
+export default mongoose.model("User", userSchema);
