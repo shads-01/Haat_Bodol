@@ -19,7 +19,7 @@ import {
 import { Clock, MapPin, SlidersHorizontal, ArrowUpDown } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useLocation } from "react-router-dom";
-import {Box, CircularProgress} from "@mui/material";
+import { Box, CircularProgress } from "@mui/material";
 
 function Donations() {
   const [show, setShow] = useState(false);
@@ -38,26 +38,22 @@ function Donations() {
         const searchQuery = queryParams.get("query");
         const categoryFilter = queryParams.get("category");
 
-        // const url = searchQuery
-        //   ? `http://localhost:5000/api/items/search?query=${encodeURIComponent(
-        //       searchQuery
-        //     )}`
-        //   : `http://localhost:5000/api/items`;
-
         let url = "http://localhost:5000/api/items";
 
         if (searchQuery) {
-          url = `http://localhost:5000/api/items/search?query=${encodeURIComponent(searchQuery)}`;
+          url = `http://localhost:5000/api/items/search?query=${encodeURIComponent(
+            searchQuery
+          )}`;
         } else if (categoryFilter) {
-          url = `http://localhost:5000/api/items?category=${encodeURIComponent(categoryFilter)}`;
-}
-
+          url = `http://localhost:5000/api/items?category=${encodeURIComponent(
+            categoryFilter
+          )}`;
+        }
         const res = await axios.get(url);
         setItems(res.data);
       } catch (err) {
         console.error("Error fetching items:", err);
-      }
-      finally {
+      } finally {
         setIsFetching(false);
       }
     };
@@ -68,7 +64,6 @@ function Donations() {
   if (isFetching) {
     return (
       <Box sx={{ backgroundColor: "#f3eee6", minHeight: "100vh" }}>
-        <NavigationBar />
         <Container
           maxWidth="lg"
           sx={{
@@ -79,7 +74,7 @@ function Donations() {
             minHeight: "50vh",
           }}
           className="d-flex justify-content-center"
-          style={{marginTop:"20%"}}
+          style={{ marginTop: "20%" }}
         >
           <CircularProgress />
         </Container>
@@ -89,7 +84,6 @@ function Donations() {
 
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "rgb(243,238,230)" }}>
-      <NavigationBar />
       <Container fluid className="px-3 px-md-5 py-4">
         <Row className="my-1 mx-1 d-flex align-items-center justify-content-between">
           <Col xs="auto">
@@ -129,7 +123,7 @@ function Donations() {
               <Dropdown.Item eventKey="utensils">Utensils</Dropdown.Item>
               <Dropdown.Item eventKey="appliances">Appliances</Dropdown.Item>
               <Dropdown.Item eventKey="others">Others</Dropdown.Item>
-              </DropdownButton>
+            </DropdownButton>
           </Col>
           <Col xs="auto" className="d-flex justify-content-center">
             <div className="me-2 me-md-3">

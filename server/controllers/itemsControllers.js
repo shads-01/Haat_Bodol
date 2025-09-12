@@ -19,7 +19,6 @@ export async function getAllItems(req, res) {
       filter.category = category.trim();
     }
 
-    // const items = await Item.find(filter).sort({ createdAt: -1 });
     const items = await Item.find(filter);
 
     res.json(items);

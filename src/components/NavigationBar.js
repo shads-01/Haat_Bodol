@@ -1,4 +1,4 @@
-import { React, useState } from "react";
+import { React, useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../css/Navbar.css";
@@ -12,9 +12,13 @@ import {
   Row,
   Col,
   Offcanvas,
+  Dropdown,
+  DropdownButton,
+  NavDropdown,
 } from "react-bootstrap";
 import { NavLink } from "react-router-dom";
 import { MessageSquareText, Bell, Search, Menu, X } from "lucide-react";
+import toast from "react-hot-toast";
 
 function NavigationBar() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -27,6 +31,50 @@ function NavigationBar() {
 
   const handleClose = () => setShowOffcanvas(false);
   const handleShow = () => setShowOffcanvas(true);
+  const [profilePic, setProfilePic] = useState("placeholder.png");
+  const [showDropdown, setShowDropdown] = useState(false);
+  const handleToggle = (isOpen) => {
+    setShowDropdown(isOpen);
+  };
+
+  const isSignedIn = () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) return false;
+
+    try {
+      // Decode JWT to check expiration
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      const currentTime = Date.now() / 1000;
+
+      return payload.exp > currentTime; // Check if token is not expired
+    } catch (error) {
+      return false;
+    }
+  };
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (!isSignedIn()) return; // Only fetch if user is signed in
+
+      try {
+        const token = localStorage.getItem("token");
+        const { data } = await axios.get(
+          "http://localhost:5000/api/auth/profile",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setProfilePic(data.profilePic?.url || "placeholder.png");
+      } catch (err) {
+        console.error("Error fetching profile pic:", err);
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   const handleSearchChange = async (e) => {
     const value = e.target.value;
@@ -55,11 +103,11 @@ function NavigationBar() {
   };
 
   const handleSearchSubmit = (e) => {
-    e.preventDefault(); // Prevent page refresh
+    e.preventDefault();
     if (!searchTerm.trim()) return;
 
     navigate(`/donations?query=${encodeURIComponent(searchTerm.trim())}`);
-    setSearchResults([]); // Clear dropdown
+    setSearchResults([]);
     setSearchResultsChecked(false);
     setSearchFocused(false);
   };
@@ -69,7 +117,27 @@ function NavigationBar() {
     setSearchResults([]);
     setSearchResultsChecked(false);
     setSearchFocused(false);
-    navigate("/donations"); // Reset view to all items
+    navigate("/donations");
+  };
+
+  const handleSignOut = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      // Clear tokens
+      localStorage.removeItem("token");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("user");
+      
+      // Redirect to login
+      navigate("/login-register");
+      toast.success("Signed out successfully");
+    } catch (error) {
+      console.error("Sign out error:", error);
+      // Still clear and redirect on error
+      localStorage.clear();
+      navigate("/login-register");
+    }
   };
 
   return (
@@ -108,7 +176,7 @@ function NavigationBar() {
                     {searchTerm && (
                       <Button
                         type="button"
-                        variant="outline-secondary"
+                        variant="outline-dark"
                         onClick={handleClearSearch}
                       >
                         <X size={14} />
@@ -157,50 +225,114 @@ function NavigationBar() {
               </div>
             </Col>
 
-            {/* desktop navigation - hidden on mobile */}
-            <Col xs="auto" className="d-none d-lg-flex align-items-end me-3">
-              <Nav className="ms-auto d-flex align-items-center gap-4">
+            {/* Desktop navigation - show different content based on auth */}
+            {isSignedIn() ? (
+              <Col xs="auto" className="d-none d-lg-flex align-items-end me-3">
+                <Nav className="ms-auto d-flex align-items-center gap-4">
+                  <Button
+                    as={NavLink}
+                    to={"/post-item"}
+                    variant="dark"
+                    className="list-btn fw-400 border border-2 border-black"
+                  >
+                    Post an Item
+                  </Button>
+                  <NavLink to="#" className="nav-link">
+                    <MessageSquareText strokeWidth={2.5} />
+                  </NavLink>
+                  <NavLink to="#" className="nav-link">
+                    <Bell strokeWidth={2.5} />
+                  </NavLink>
+                  <div className="profile-dropdown">
+                    <NavDropdown
+                      title={
+                        <img
+                          src={profilePic}
+                          alt="Profile picture"
+                          className="rounded-circle border border-2 border-black"
+                          width={60}
+                          height={60}
+                        />
+                      }
+                      id="profile-dropdown"
+                      show={showDropdown}
+                      onToggle={handleToggle}
+                      align="end"
+                    >
+                      <NavDropdown.Item
+                        as={NavLink}
+                        to="/profile"
+                        className="d-flex align-items-center"
+                      >
+                        <i className="fas fa-user me-2"></i>
+                        Profile
+                      </NavDropdown.Item>
+                      <NavDropdown.Divider />
+                      <NavDropdown.Item
+                        onClick={handleSignOut}
+                        className="d-flex align-items-center text-danger"
+                        style={{ cursor: "pointer" }}
+                      >
+                        <i className="fas fa-sign-out-alt me-2"></i>
+                        Sign Out
+                      </NavDropdown.Item>
+                    </NavDropdown>
+                  </div>
+                </Nav>
+              </Col>
+            ) : (
+              <Col xs="auto" className="d-none d-lg-flex align-items-center">
                 <Button
                   as={NavLink}
-                  to={"/post-item"}
-                  variant="dark"
-                  className="list-btn fw-400 border ackborder-2 border-black"
+                  to="/login-register"
+                  variant="outline-dark"
+                  className="border-2 border-black fw-500"
                 >
-                  Post an Item
+                  Sign In / Sign Up
                 </Button>
-                <NavLink to="#" className="nav-link">
-                  <MessageSquareText strokeWidth={2.5} />
-                </NavLink>
-                <NavLink to="#" className="nav-link">
-                  <Bell strokeWidth={2.5} />
-                </NavLink>
-                <NavLink to="/profile" className="nav-link">
-                  <img
-                    src="/placeholder.png"
-                    alt="Profile picture"
-                    className="rounded-circle border border-2 border-black"
-                    width={50}
-                    height={50}
-                  />
-                </NavLink>
-              </Nav>
-            </Col>
+              </Col>
+            )}
 
             {/* Mobile menu bar */}
             <Col className="d-lg-none d-flex align-items-center justify-content-end ms-auto">
-              <NavLink
-                to="/profile"
-                className="nav-link me-4"
-                onClick={handleClose}
-              >
-                <img
-                  src="/placeholder.png"
-                  alt="Profile picture"
-                  className="rounded-circle border border-2 border-black"
-                  width={40}
-                  height={40}
-                />
-              </NavLink>
+              {isSignedIn() && (
+                <div className="profile-dropdown me-2">
+                  <NavDropdown
+                    title={
+                      <img
+                        src={profilePic}
+                        alt="Profile picture"
+                        className="rounded-circle border border-2 border-black"
+                        width={50}
+                        height={50}
+                      />
+                    }
+                    id="profile-dropdown-mobile"
+                    show={showDropdown}
+                    onToggle={handleToggle}
+                    align="end"
+                  >
+                    <NavDropdown.Item
+                      as={NavLink}
+                      to="/profile"
+                      className="d-flex align-items-center"
+                    >
+                      <i className="fas fa-user me-2"></i>
+                      Profile
+                    </NavDropdown.Item>
+                    <NavDropdown.Divider />
+                    <NavDropdown.Item
+                      onClick={handleSignOut}
+                      className="d-flex align-items-center text-danger"
+                      style={{ cursor: "pointer" }}
+                    >
+                      <i className="fas fa-sign-out-alt me-2"></i>
+                      Sign Out
+                    </NavDropdown.Item>
+                  </NavDropdown>
+                </div>
+              )}
+
               <Button
                 variant="dark"
                 className="menu-btn py-1 px-2"
@@ -213,7 +345,7 @@ function NavigationBar() {
         </Container>
       </Navbar>
 
-      {/* mobile menu offcanvas */}
+      {/* Mobile menu offcanvas */}
       <Offcanvas
         show={showOffcanvas}
         onHide={handleClose}
@@ -227,42 +359,59 @@ function NavigationBar() {
         </Offcanvas.Header>
 
         <Offcanvas.Body className="d-flex flex-column">
-          <Nav className="flex-column gap-3">
-            <div className="d-flex justify-content-center mb-3">
+          {isSignedIn() ? (
+            <Nav className="flex-column gap-3">
+              <div className="d-flex justify-content-center mb-3">
+                <Button
+                  as={NavLink}
+                  to="/post-item"
+                  variant="dark"
+                  className="list-btn w-100"
+                  onClick={handleClose}
+                >
+                  Post an Item
+                </Button>
+              </div>
+              <div className="d-flex flex-column gap-3">
+                <Button
+                  as={NavLink}
+                  to="/profile"
+                  variant="outline-dark"
+                  className="d-flex align-items-center gap-3 p-2 border border-black w-100"
+                  onClick={handleClose}
+                >
+                  <MessageSquareText strokeWidth={2} size={20} />
+                  <span>Messages</span>
+                </Button>
+                <Button
+                  as={NavLink}
+                  to="/profile"
+                  variant="outline-dark"
+                  className="d-flex align-items-center gap-3 p-2 border border-black w-100"
+                  onClick={handleClose}
+                >
+                  <Bell strokeWidth={2} size={20} />
+                  <span>Notifications</span>
+                </Button>
+              </div>
+            </Nav>
+          ) : (
+            <div className="d-flex justify-content-center">
               <Button
                 as={NavLink}
-                to="/post-item"
+                to="/login-register"
                 variant="dark"
-                className="list-btn w-100"
+                className="w-100 py-3"
+                onClick={handleClose}
               >
-                Post an Item
+                Sign In / Sign Up
               </Button>
             </div>
-            <div className="d-flex flex-column gap-3">
-              <Button
-                as={NavLink}
-                to="/profile"
-                variant="outline-dark"
-                className="d-flex align-items-center gap-3 p-2 border border-black w-100"
-              >
-                <MessageSquareText strokeWidth={2} size={20} />
-                <span>Messages</span>
-              </Button>
-              <Button
-                as={NavLink}
-                to="/profile"
-                variant="outline-dark"
-                className="d-flex align-items-center gap-3 p-2 border border-black w-100"
-              >
-                <Bell strokeWidth={2} size={20} />
-                <span>Notifications</span>
-              </Button>
-            </div>
-          </Nav>
+          )}
         </Offcanvas.Body>
       </Offcanvas>
 
-      {/* mobile search bar */}
+      {/* Mobile search bar */}
       <Row
         className="d-lg-none d-flex justify-content-center mt-3 position-relative"
         style={{ marginBottom: "-10px" }}
@@ -277,9 +426,7 @@ function NavigationBar() {
                 value={searchTerm}
                 onChange={handleSearchChange}
                 onFocus={() => setSearchFocused(true)}
-                onBlur={() =>
-                  setTimeout(() => setSearchFocused(false), 150)
-                }
+                onBlur={() => setTimeout(() => setSearchFocused(false), 150)}
               />
               {searchTerm && (
                 <Button
@@ -335,4 +482,5 @@ function NavigationBar() {
     </>
   );
 }
+
 export default NavigationBar;

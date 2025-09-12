@@ -281,7 +281,6 @@ const ProfilePage = () => {
   if (isLoading) {
     return (
       <Box sx={{ backgroundColor: "#f3eee6", minHeight: "100vh" }}>
-        <NavigationBar />
         <Container
           maxWidth="lg"
           sx={{
@@ -329,7 +328,6 @@ const ProfilePage = () => {
 
   return (
     <Box sx={{ backgroundColor: "#f3eee6", minHeight: "100vh" }}>
-      <NavigationBar />
       <Container maxWidth="lg" sx={{ py: 4 }}>
         {/* Profile Overview Section */}
         <Box sx={cardStyle} className="py-5">
