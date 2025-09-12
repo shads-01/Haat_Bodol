@@ -45,7 +45,7 @@ const ProfilePage = () => {
   });
   const [userData, setUserData] = useState({
     name: "",
-    profilePicture: "",
+    profilePic: "",
     joinDate: "",
     donations: 0,
     claims: 0,
@@ -130,7 +130,7 @@ const ProfilePage = () => {
 
         setUserData({
           name: data.name || "User",
-          profilePicture: data.profilePicture || "",
+          profilePic: data.profilePic?.url || "", // ✅ safe
           joinDate: joinDate,
           donations: data.donations || 0,
           claims: data.claims || 0,
@@ -303,17 +303,24 @@ const ProfilePage = () => {
     formData.append("profilePhoto", file);
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/profile/picture", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        body: formData,
-      });
+      const res = await fetch(
+        "http://localhost:5000/api/auth/profile/picture",
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          body: formData,
+        }
+      );
 
       if (!res.ok) throw new Error("Upload failed");
       const data = await res.json();
 
       // ✅ Update userData with new profileImage URL from server
-      setUserData((prev) => ({ ...prev, profilePic: data.fileUrl }));
+      setUserData((prev) => ({
+        ...prev,
+        profilePic: data.user.profilePic.url, // depends on your response
+      }));
+      toast.success("Successfully uploaded profile picture.");
     } catch (err) {
       console.error(err);
       toast.error("Error uploading profile picture");
@@ -339,7 +346,7 @@ const ProfilePage = () => {
               style={{ margin: "0 2rem" }}
             >
               <ProfilePictureUploadBox
-                currentImage={userData.profilePic}
+                currentImage={userData.profilePic || null}
                 onImageChange={onProfileImageChange}
                 size={150}
               />

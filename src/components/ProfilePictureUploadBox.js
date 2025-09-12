@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Avatar, Tooltip, Box } from "@mui/material";
 import { PhotoCamera } from "@mui/icons-material";
 import toast from "react-hot-toast";
@@ -7,21 +7,23 @@ const ProfilePictureUploadBox = ({ currentImage, onImageChange }) => {
   const [previewImage, setPreviewImage] = useState(currentImage || null);
   const fileInputRef = useRef(null);
 
+  // 🔑 keep previewImage in sync with prop
+useEffect(() => {
+  setPreviewImage(currentImage || null);
+}, [currentImage]);
+
   const handleFileSelect = (event) => {
     const file = event.target.files[0];
     if (file) {
-      // Validate file type
       if (!file.type.startsWith("image/")) {
         toast.error("Please select an image file");
         return;
       }
 
-      // Validate file size (e.g., max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         toast.error("File size must be less than 5MB");
         return;
       }
-
       // Create preview URL
       const previewUrl = URL.createObjectURL(file);
       setPreviewImage(previewUrl);
@@ -55,7 +57,7 @@ const ProfilePictureUploadBox = ({ currentImage, onImageChange }) => {
       />
 
       {/* Clickable profile picture */}
-      <Tooltip title="Click to upload profile picture">
+      <Tooltip title="Click to upload/change profile picture">
         <Avatar
           onClick={handleAvatarClick}
           src={previewImage}
