@@ -11,6 +11,7 @@ import {
   Button,
   Badge,
   ButtonGroup,
+  Dropdown,
   DropdownButton,
   Offcanvas,
   Form,
@@ -33,12 +34,21 @@ function Donations() {
       try {
         const queryParams = new URLSearchParams(location.search);
         const searchQuery = queryParams.get("query");
+        const categoryFilter = queryParams.get("category");
 
-        const url = searchQuery
-          ? `http://localhost:5000/api/items/search?query=${encodeURIComponent(
-              searchQuery
-            )}`
-          : `http://localhost:5000/api/items`;
+        // const url = searchQuery
+        //   ? `http://localhost:5000/api/items/search?query=${encodeURIComponent(
+        //       searchQuery
+        //     )}`
+        //   : `http://localhost:5000/api/items`;
+
+        let url = "http://localhost:5000/api/items";
+
+        if (searchQuery) {
+          url = `http://localhost:5000/api/items/search?query=${encodeURIComponent(searchQuery)}`;
+        } else if (categoryFilter) {
+          url = `http://localhost:5000/api/items?category=${encodeURIComponent(categoryFilter)}`;
+}
 
         const res = await axios.get(url);
         setItems(res.data);
@@ -79,7 +89,20 @@ function Donations() {
               variant="dark"
               size="sm"
               className="lc-btn"
-            ></DropdownButton>
+              onSelect={(selectedCategory) => {
+                window.location.href = `/donations?category=${selectedCategory}`;
+              }}
+            >
+              <Dropdown.Item eventKey="">All</Dropdown.Item>
+              <Dropdown.Item eventKey="electronics">Electronics</Dropdown.Item>
+              <Dropdown.Item eventKey="furnitures">Furnitures</Dropdown.Item>
+              <Dropdown.Item eventKey="books">Books</Dropdown.Item>
+              <Dropdown.Item eventKey="clothes">Clothes</Dropdown.Item>
+              <Dropdown.Item eventKey="toys">Toys</Dropdown.Item>
+              <Dropdown.Item eventKey="utensils">Utensils</Dropdown.Item>
+              <Dropdown.Item eventKey="appliances">Appliances</Dropdown.Item>
+              <Dropdown.Item eventKey="others">Others</Dropdown.Item>
+              </DropdownButton>
           </Col>
           <Col xs="auto" className="d-flex justify-content-center">
             <div className="me-2 me-md-3">
