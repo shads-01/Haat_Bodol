@@ -131,7 +131,6 @@ function ItemsPostingPage() {
   };
   return (
     <div style={{ backgroundColor: "rgb(243,238,230)", minHeight: "100vh" }}>
-      <NavigationBar />
       <Container
         fluid
         className="d-flex justify-content-center p-5 "

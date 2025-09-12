@@ -38,7 +38,6 @@ function ProductDetails() {
   return (
     <>
       <div style={{ minHeight: "100vh", backgroundColor: "rgb(243,238,230)" }}>
-        <NavigationBar />
         <Container className="py-4">
           <Row className="d-flex justify-content-center">
             {/* Left Column - Item Details */}

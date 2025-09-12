@@ -64,7 +64,6 @@ function Donations() {
   if (isFetching) {
     return (
       <Box sx={{ backgroundColor: "#f3eee6", minHeight: "100vh" }}>
-        <NavigationBar />
         <Container
           maxWidth="lg"
           sx={{
@@ -85,7 +84,6 @@ function Donations() {
 
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "rgb(243,238,230)" }}>
-      <NavigationBar />
       <Container fluid className="px-3 px-md-5 py-4">
         <Row className="my-1 mx-1 d-flex align-items-center justify-content-between">
           <Col xs="auto">

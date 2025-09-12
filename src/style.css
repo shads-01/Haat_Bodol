@@ -111,6 +111,46 @@ body {
   box-sizing: border-box;
 }
 
+/* Navbar dropdown design */
+.profile-dropdown .dropdown-toggle::after {
+    display: none;
+}
+.profile-dropdown .dropdown-item.active,
+.profile-dropdown .dropdown-item:active {
+    text-decoration: none;
+    background-color: transparent;
+    color: black;
+}
+
+.profile-dropdown .dropdown-item:focus,
+.profile-dropdown .dropdown-item:hover {
+    color: var(--bs-dropdown-link-hover-color);
+    background-color: none;
+}
+
+/* Hover animation with underline */
+.profile-dropdown .dropdown-item {
+    position: relative;
+    padding: 0.5rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.profile-dropdown .dropdown-item::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background-color: currentColor;
+    transition: all 0.3s ease;
+    transform: translateX(-55px);
+    }
+
+.profile-dropdown .dropdown-item:hover::after {
+    width: 50%;
+}
+
 
 @media (max-width: 768px) {
     .content {
