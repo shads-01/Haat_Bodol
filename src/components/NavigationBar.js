@@ -14,11 +14,13 @@ import {
   Offcanvas,
 } from "react-bootstrap";
 import { NavLink } from "react-router-dom";
-import { MessageSquareText, Bell, Search, Menu } from "lucide-react";
+import { MessageSquareText, Bell, Search, Menu, X } from "lucide-react";
 
 function NavigationBar() {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [searchResultsChecked, setSearchResultsChecked] = useState(false);
+  const [searchFocused, setSearchFocused] = useState(false);
   const navigate = useNavigate();
 
   const [showOffcanvas, setShowOffcanvas] = useState(false);
@@ -32,6 +34,7 @@ function NavigationBar() {
 
     if (value.trim() === "") {
       setSearchResults([]);
+      setSearchResultsChecked(false);
       return;
     }
 
@@ -43,9 +46,11 @@ function NavigationBar() {
       );
 
       setSearchResults(res.data);
+      setSearchResultsChecked(true);
     } catch (error) {
       console.error("Search error:", error);
       setSearchResults([]);
+      setSearchResultsChecked(true);
     }
   };
 
@@ -53,8 +58,18 @@ function NavigationBar() {
     e.preventDefault(); // Prevent page refresh
     if (!searchTerm.trim()) return;
 
-    navigate(`/donations?query=${encodeURIComponent(searchTerm)}`);
+    navigate(`/donations?query=${encodeURIComponent(searchTerm.trim())}`);
     setSearchResults([]); // Clear dropdown
+    setSearchResultsChecked(false);
+    setSearchFocused(false);
+  };
+
+  const handleClearSearch = () => {
+    setSearchTerm("");
+    setSearchResults([]);
+    setSearchResultsChecked(false);
+    setSearchFocused(false);
+    navigate("/donations"); // Reset view to all items
   };
 
   return (
@@ -80,12 +95,25 @@ function NavigationBar() {
                 <Form className="w-100" onSubmit={handleSearchSubmit}>
                   <InputGroup className="searchbox">
                     <Form.Control
-                      type="search"
+                      type="text"
                       placeholder="Search"
                       className="search-input border-1 border-black "
                       value={searchTerm}
                       onChange={handleSearchChange}
+                      onFocus={() => setSearchFocused(true)}
+                      onBlur={() =>
+                        setTimeout(() => setSearchFocused(false), 150)
+                      }
                     />
+                    {searchTerm && (
+                      <Button
+                        type="button"
+                        variant="outline-secondary"
+                        onClick={handleClearSearch}
+                      >
+                        <X size={14} />
+                      </Button>
+                    )}
                     <Button
                       type="submit"
                       variant="dark"
@@ -97,7 +125,7 @@ function NavigationBar() {
                 </Form>
 
                 {/* Search results dropdown */}
-                {searchTerm.trim() !== "" && (
+                {searchFocused && searchTerm.trim() !== "" && (
                   <div
                     className="search-dropdown bg-white border p-2 mt-1 rounded shadow"
                     style={{
@@ -121,9 +149,9 @@ function NavigationBar() {
                           {item.title}
                         </div>
                       ))
-                    ) : (
+                    ) : searchResultsChecked ? (
                       <div className="text-muted">No items found</div>
-                    )}
+                    ) : null}
                   </div>
                 )}
               </div>
@@ -235,27 +263,6 @@ function NavigationBar() {
       </Offcanvas>
 
       {/* mobile search bar */}
-      {/* <Row className="d-lg-none d-flex justify-content-center mt-3" style={{marginBottom: '-10px'}}>
-        <Form className="w-100" style={{ maxWidth: "90%" }}>
-          <InputGroup className="searchbox bg-light">
-            <Form.Control
-              type="search"
-              placeholder="Search"
-              className="search-input border-1 border-black"
-              value={searchTerm}
-              onChange={handleSearchChange}
-            />
-            <Button
-              variant="dark"
-              className="search-btn py-0 border border-black"
-            >
-              <Search size={18} />
-            </Button>
-          </InputGroup>
-        </Form>
-      </Row> */}
-
-      {/* mobile search bar */}
       <Row
         className="d-lg-none d-flex justify-content-center mt-3 position-relative"
         style={{ marginBottom: "-10px" }}
@@ -269,7 +276,20 @@ function NavigationBar() {
                 className="search-input border-1 border-black"
                 value={searchTerm}
                 onChange={handleSearchChange}
+                onFocus={() => setSearchFocused(true)}
+                onBlur={() =>
+                  setTimeout(() => setSearchFocused(false), 150)
+                }
               />
+              {searchTerm && (
+                <Button
+                  type="button"
+                  variant="outline-secondary"
+                  onClick={handleClearSearch}
+                >
+                  <X size={14} />
+                </Button>
+              )}
               <Button
                 type="submit"
                 variant="dark"
@@ -281,7 +301,7 @@ function NavigationBar() {
           </Form>
 
           {/* Mobile dropdown suggestion */}
-          {searchTerm.trim() !== "" && (
+          {searchFocused && searchTerm.trim() !== "" && (
             <div
               className="search-dropdown bg-white border p-2 mt-1 rounded shadow"
               style={{
@@ -305,9 +325,9 @@ function NavigationBar() {
                     {item.title}
                   </div>
                 ))
-              ) : (
+              ) : searchResultsChecked ? (
                 <div className="text-muted">No items found</div>
-              )}
+              ) : null}
             </div>
           )}
         </div>
