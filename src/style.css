@@ -148,7 +148,7 @@ body {
     }
 
 .profile-dropdown .dropdown-item:hover::after {
-    width: 50%;
+    width: 65%;
 }
 
 

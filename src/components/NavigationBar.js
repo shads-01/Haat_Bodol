@@ -18,6 +18,7 @@ import {
 } from "react-bootstrap";
 import { NavLink } from "react-router-dom";
 import { MessageSquareText, Bell, Search, Menu, X } from "lucide-react";
+import toast from "react-hot-toast";
 
 function NavigationBar() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -121,28 +122,16 @@ function NavigationBar() {
 
   const handleSignOut = async () => {
     try {
-      const token = localStorage.getItem("accessToken");
-      
-      // Optional: Call logout API
-      if (token) {
-        try {
-          await axios.post("http://localhost:5000/api/auth/logout", {}, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-        } catch (apiError) {
-          console.warn('Logout API call failed:', apiError);
-        }
-      }
+      const token = localStorage.getItem("token");
 
       // Clear tokens
-      localStorage.removeItem("accessToken");
+      localStorage.removeItem("token");
       localStorage.removeItem("refreshToken");
       localStorage.removeItem("user");
       
       // Redirect to login
       navigate("/login-register");
+      toast.success("Signed out successfully");
     } catch (error) {
       console.error("Sign out error:", error);
       // Still clear and redirect on error
