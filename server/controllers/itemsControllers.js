@@ -84,3 +84,17 @@ export async function searchItems(req, res) {
     res.status(500).json({ message: "Internal server error" });
   }
 }
+
+export const getUserItems = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    const items = await Item.find({ donatedBy: userId })
+      .select('title category photos status')
+      .sort({ createdAt: -1 }); // Most recent first
+    
+    res.json(items);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch user items' });
+  }
+};

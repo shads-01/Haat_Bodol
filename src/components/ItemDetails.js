@@ -160,6 +160,9 @@ function ProductDetails() {
                     <div className="d-grid gap-2 mt-4">
                       <button className="btn btn-dark">Request Item</button>
                     </div>
+                    <div className="d-grid gap-2 mt-4">
+                      <button className="btn btn-dark">Message Donor</button>
+                    </div>
                   </>
                 ) : (
                   // Show fallback when no donor info
