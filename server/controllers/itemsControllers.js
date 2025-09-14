@@ -90,7 +90,7 @@ export const getUserItems = async (req, res) => {
     const { userId } = req.params;
     
     const items = await Item.find({ donatedBy: userId })
-      .select('title category photos status')
+      .select('title category photos status createdAt')
       .sort({ createdAt: -1 }); // Most recent first
     
     res.json(items);
