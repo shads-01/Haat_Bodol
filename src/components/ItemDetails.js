@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom";
 import { Container, Row, Col, Card, Badge, Carousel } from "react-bootstrap";
 import { Clock, MapPin } from "lucide-react";
 import axios from "axios";
-import NavigationBar from "./NavigationBar";
 import Footer from "./Footer";
 import "../css/ItemDetails.css";
 import { formatDistanceToNow } from "date-fns";
@@ -11,17 +10,18 @@ import { formatDistanceToNow } from "date-fns";
 function ProductDetails() {
   const { id } = useParams();
   const [item, setItem] = useState(null);
+  const [donor, setDonor] = useState(null);
 
   useEffect(() => {
     const fetchItem = async () => {
       try {
         const res = await axios.get(`http://localhost:5000/api/items/${id}`);
         setItem(res.data);
+        setDonor(res.data.donatedBy);
       } catch (err) {
         console.error("Error fetching item:", err);
       }
     };
-
     fetchItem();
   }, [id]);
 
@@ -70,7 +70,7 @@ function ProductDetails() {
                 )}
                 {/* Item Details */}
                 <div className="px-2">
-                  <hr/>
+                  <hr />
                   <h3 className="mb-2">{item.title}</h3>
                   <h6>
                     {capitalizeWords(item.category)} <strong>.</strong>{" "}
@@ -122,21 +122,19 @@ function ProductDetails() {
             {/* Right Column - Donor Information */}
             <Col md={12} lg={4}>
               <div className="bg-white rounded shadow-sm p-4">
-                <h4 className="mb-2">Donated By</h4>
+                <h4 className="mb-4 text-center">Donated By</h4>
 
                 <div className="text-center mb-4">
-                  <div
-                    className="bg-light rounded-circle d-inline-flex align-items-center justify-content-center"
-                    style={{ width: "80px", height: "80px" }}
-                  >
-                    <span className="h2 text-muted mb-0">
-                      {item.donorName
-                        ? item.donorName.charAt(0).toUpperCase()
-                        : "D"}
-                    </span>
-                  </div>
+                  <img
+                    src={donor.profilePic?.url || "/placeholder.png"}
+                    alt="Profile picture"
+                    className="rounded-circle border border-2 border-black"
+                    width={100}
+                    height={100}
+                  />
+
                   <h5 className="mt-3 mb-1">
-                    {item.donorName || "Anonymous Donor"}
+                    {donor.name || "Anonymous Donor"}
                   </h5>
                 </div>
 
@@ -144,21 +142,13 @@ function ProductDetails() {
                   <div className="mb-2">
                     <strong>Email: </strong>
                     <span className="text-muted">
-                      {item.donorEmail || "Not provided"}
+                      {donor.email || "Not provided"}
                     </span>
                   </div>
                   <div className="mb-2">
                     <strong>Phone: </strong>
                     <span className="text-muted">
-                      {item.donorPhone || "Not provided"}
-                    </span>
-                  </div>
-                  <div className="mb-2">
-                    <strong>Member Since: </strong>
-                    <span className="text-muted">
-                      {item.donorJoinedDate
-                        ? new Date(item.donorJoinedDate).toLocaleDateString()
-                        : "N/A"}
+                      {donor.phone || "Not provided"}
                     </span>
                   </div>
                 </div>

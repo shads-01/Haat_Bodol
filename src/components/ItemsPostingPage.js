@@ -105,7 +105,12 @@ function ItemsPostingPage() {
         }
       });
 
-      await axios.post("http://localhost:5000/api/items", formDataObj);
+      const token = localStorage.getItem("token");
+      await axios.post("http://localhost:5000/api/items", formDataObj, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       toast.dismiss(loadingToast);
       toast.success("Item added successfully!");

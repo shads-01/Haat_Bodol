@@ -41,7 +41,11 @@ const itemSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    //createdBy --> user id
+    donatedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     status: {
       type: String,
       enum: ["available", "reserved", "donated"],

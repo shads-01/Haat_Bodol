@@ -6,6 +6,7 @@ import {
   searchItems,
 } from "../controllers/itemsControllers.js";
 import { upload } from "../config/multerConfig.js";
+import auth from "../middleware/auth.js"
 
 const router = Router();
 
@@ -14,7 +15,7 @@ router.get("/", getAllItems);
 
 router.get("/search", searchItems);
 
-router.post("/", upload.array("itemPhotos", 4), createAnItem);
+router.post("/", auth, upload.array("itemPhotos", 4), createAnItem);
 
 router.get("/:id", getItemById);
 
