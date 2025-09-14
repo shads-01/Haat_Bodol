@@ -31,6 +31,8 @@ function Donations() {
   const handleClose = () => setShow(false);
   const toggleShow = () => setShow((s) => !s);
 
+  const [sortByNewest, setSortByNewest] = useState(false);
+
   const location = useLocation();
 
   useEffect(() => {
@@ -51,6 +53,12 @@ function Donations() {
             categoryFilter
           )}`;
         }
+
+        //add sort parameter if sortByNewest is true
+        if (sortByNewest && !searchQuery) {
+          url += (url.includes("?") ? "&" : "?") + "sort=desc";
+        }
+
         const res = await axios.get(url);
         setItems(res.data);
       } catch (err) {
@@ -61,7 +69,7 @@ function Donations() {
     };
 
     fetchItems();
-  }, [location.search]);
+  }, [location.search, sortByNewest]);
 
   if (isFetching) {
     return (
@@ -130,9 +138,10 @@ function Donations() {
           <Col xs="auto" className="d-flex justify-content-center">
             <div className="me-2 me-md-3">
               <Button
-                variant="outline-dark"
-                className="sort-btn d-flex align-items-center"
+                variant={sortByNewest ? "dark" : "outline-dark"}
+                className={`sort-btn d-flex align-items-center ${sortByNewest ? "active" : ""}`}
                 size="sm"
+                onClick={() => setSortByNewest(!sortByNewest)}
               >
                 <ArrowUpDown size={16} className="me-1" />
                 <span className="d-none d-sm-inline">Sort by</span>
