@@ -1,8 +1,6 @@
 import User from "../models/user.js";
-import Review from "../models/review.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import toast from "react-hot-toast";
 
 // Register a new user
 const register = async (req, res) => {
@@ -84,7 +82,6 @@ const login = async (req, res) => {
         donations: user.donations,
         claims: user.claims,
         level: user.level,
-        rating: user.rating,
       },
     });
   } catch (error) {
@@ -95,23 +92,7 @@ const login = async (req, res) => {
 //Get user profile
 export const getProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.userId)
-      .select("-password")
-      .populate({
-        path: "reviews",
-        options: {
-          sort: { createdAt: -1 },
-          limit: 5,
-        },
-      });
-
-    if (!user.reviews || user.reviews.length === 0) {
-      const reviews = await Review.find({ userId: req.userId })
-        .sort({ createdAt: -1 })
-        .limit(5);
-
-      user.reviews = reviews;
-    }
+    const user = await User.findById(req.userId).select("-password");
 
     res.json(user);
   } catch (error) {
@@ -120,11 +101,10 @@ export const getProfile = async (req, res) => {
 };
 
 // Upload profile pic
-// controllers/userController.js  (example filename)
 export const uploadProfilePicture = async (req, res) => {
   try {
     console.log("File:", req.file);
-    console.log("User:", req.user); // <-- check if this logs an object
+    console.log("User:", req.user);
 
     const userId = req.user?.id || req.userId;
     if (!userId) {
