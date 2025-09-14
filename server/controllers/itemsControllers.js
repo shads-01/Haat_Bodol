@@ -19,10 +19,12 @@ export async function getAllItems(req, res) {
       filter.category = category.trim();
     }
 
-    const items = await Item.find(filter);
+    const sortOrder = req.query.sort === "desc" ? -1 : 1;
+    const items = await Item.find(filter).sort({ createdAt: sortOrder });
 
     res.json(items);
-  } catch (err) {
+  } 
+  catch (err) {
     res.status(500).json({ error: err.message });
   }
 }
