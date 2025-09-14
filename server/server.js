@@ -4,7 +4,6 @@ import cors from "cors";
 import mongoose from "mongoose";
 import itemRoutes from "./routes/itemRoutes.js";
 import authRoutes from "./routes/auth.js";
-import reviewsRoutes from "./routes/reviews.js";
 
 const app = express();
 
@@ -29,7 +28,6 @@ app.get("/api/health", (req, res) => {
 
 app.use("/api/items", itemRoutes);
 app.use("/api/auth", authRoutes);
-app.use("/api/reviews", reviewsRoutes);
 
 const PORT = process.env.PORT || 5000;
 

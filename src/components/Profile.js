@@ -1,22 +1,18 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Container,
   Typography,
-  Avatar,
   Grid,
   Button,
   TextField,
   Divider,
   Chip,
-  Rating,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemAvatar,
   Snackbar,
   Alert,
   CircularProgress,
+  Tabs,
+  Tab,
 } from "@mui/material";
 import {
   Edit,
@@ -27,8 +23,8 @@ import {
   Cake,
   Save,
   Cancel,
+  Person,
 } from "@mui/icons-material";
-import NavigationBar from "./NavigationBar";
 import ProfilePictureUploadBox from "./ProfilePictureUploadBox";
 import toast from "react-hot-toast";
 
@@ -37,6 +33,7 @@ const ProfilePage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [picLoading, setPicLoading] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
+  const [tabValue, setTabValue] = useState(0);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -49,8 +46,6 @@ const ProfilePage = () => {
     donations: 0,
     claims: 0,
     level: "Bronze",
-    rating: 0,
-    reviews: [],
   });
   const [personalInfo, setPersonalInfo] = useState({
     name: "",
@@ -61,17 +56,8 @@ const ProfilePage = () => {
   });
   const [originalInfo, setOriginalInfo] = useState({});
 
-  // Fetch user data from backend
   useEffect(() => {
-    const fetchData = async () => {
-      await fetchUserData();
-      const userId = userData._id;
-      if (userId) {
-        await fetchReviewsSeparately(userId);
-      }
-    };
-
-    fetchData();
+    fetchUserData();
   }, []);
 
   const fetchUserData = async () => {
@@ -95,13 +81,9 @@ const ProfilePage = () => {
         },
       });
 
-      console.log("Profile response status:", response.status);
-
       if (response.ok) {
         const data = await response.json();
-        console.log("Profile data received:", data);
 
-        // Format join date
         let joinDate = "Recent";
         if (data.joinDate) {
           joinDate = new Date(data.joinDate).toLocaleDateString("en-US", {
@@ -115,27 +97,13 @@ const ProfilePage = () => {
           });
         }
 
-        // Check if reviews exist in the response and handle the data structure
-        let reviews = [];
-        if (data.reviews && Array.isArray(data.reviews)) {
-          reviews = data.reviews.map((review) => ({
-            // Handle both old and new review structures
-            reviewerName: review.reviewerName || review.user || "Anonymous",
-            rating: review.rating || 0,
-            comment: review.comment || "",
-            createdAt: review.createdAt,
-          }));
-        }
-
         setUserData({
           name: data.name || "User",
           profilePic: data.profilePic?.url || "",
-          joinDate: joinDate,
+          joinDate,
           donations: data.donations || 0,
           claims: data.claims || 0,
           level: data.level || "Bronze",
-          rating: data.rating || 0,
-          reviews: reviews,
         });
 
         setPersonalInfo({
@@ -155,9 +123,7 @@ const ProfilePage = () => {
         });
       } else {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(
-          errorData.message || `Server returned ${response.status}`
-        );
+        throw new Error(errorData.message || `Server returned ${response.status}`);
       }
     } catch (error) {
       console.error("Error fetching user data:", error);
@@ -168,31 +134,6 @@ const ProfilePage = () => {
       });
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  // Function to fetch reviews separately if needed
-  const fetchReviewsSeparately = async (userId) => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        `http://localhost:5000/api/reviews/user/${userId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.ok) {
-        const reviews = await response.json();
-        setUserData((prevData) => ({
-          ...prevData,
-          reviews: reviews,
-        }));
-      }
-    } catch (error) {
-      console.error("Error fetching reviews:", error);
     }
   };
 
@@ -268,6 +209,33 @@ const ProfilePage = () => {
     setSnackbar({ ...snackbar, open: false });
   };
 
+  const onProfileImageChange = async (file, previewUrl) => {
+    try {
+      const formData = new FormData();
+      formData.append("profilePhoto", file);
+      setPicLoading(true);
+      const res = await fetch("http://localhost:5000/api/auth/profile/picture", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error("Upload failed");
+      const data = await res.json();
+
+      setUserData((prev) => ({
+        ...prev,
+        profilePic: data.user.profilePic.url,
+      }));
+      setPicLoading(false);
+      toast.success("Successfully uploaded profile picture.");
+    } catch (err) {
+      console.error(err);
+      setPicLoading(false);
+      toast.error("Error uploading profile picture");
+    }
+  };
+
   const cardStyle = {
     backgroundColor: "white",
     border: "1px solid",
@@ -296,43 +264,14 @@ const ProfilePage = () => {
       </Box>
     );
   }
-  const onProfileImageChange = async (file, previewUrl) => {
-    try {
-      const formData = new FormData();
-      formData.append("profilePhoto", file);
-      setPicLoading(true);
-      const res = await fetch(
-        "http://localhost:5000/api/auth/profile/picture",
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-          body: formData,
-        }
-      );
-
-      if (!res.ok) throw new Error("Upload failed");
-      const data = await res.json();
-
-      // ✅ Update userData with new profileImage URL from server
-      setUserData((prev) => ({
-        ...prev,
-        profilePic: data.user.profilePic.url, // depends on your response
-      }));
-      setPicLoading(false);
-      toast.success("Successfully uploaded profile picture.");
-    } catch (err) {
-      console.error(err);
-      toast.error("Error uploading profile picture");
-    }
-  };
 
   return (
     <Box sx={{ backgroundColor: "#f3eee6", minHeight: "100vh" }}>
       <Container maxWidth="lg" sx={{ py: 4 }}>
-        {/* Profile Overview Section */}
+        {/* Profile Overview Section (restored) */}
         <Box sx={cardStyle} className="py-5">
           <Grid container spacing={3} alignItems="center">
-            {/* Profile Picture Section */}
+            {/* Profile Picture */}
             <Grid
               item
               xs={12}
@@ -351,7 +290,7 @@ const ProfilePage = () => {
               />
             </Grid>
 
-            {/* Profile Info Section */}
+            {/* Name, joinDate, stats */}
             <Grid item xs={12} md={9}>
               <Typography variant="h4" gutterBottom>
                 {userData.name}
@@ -370,7 +309,7 @@ const ProfilePage = () => {
                 sx={{ mb: 2 }}
               />
 
-              <Grid container spacing={2} mb={2}>
+              <Grid container spacing={2}>
                 <Grid item>
                   <Typography
                     variant="body1"
@@ -389,70 +328,7 @@ const ProfilePage = () => {
                     {userData.claims} Claims
                   </Typography>
                 </Grid>
-                <Grid item>
-                  <Box display="flex" alignItems="center">
-                    <Rating
-                      value={userData.rating}
-                      precision={0.1}
-                      size="small"
-                      readOnly
-                    />
-                    <Typography
-                      variant="body1"
-                      color="text.primary"
-                      ml={1}
-                      fontWeight="medium"
-                    >
-                      {userData.rating.toFixed(1)}
-                    </Typography>
-                  </Box>
-                </Grid>
               </Grid>
-
-              {/* Reviews Section */}
-              {userData.reviews && userData.reviews.length > 0 ? (
-                <>
-                  <Typography variant="h6" gutterBottom mt={2}>
-                    Recent Reviews
-                  </Typography>
-                  <List>
-                    {userData.reviews.map((review, index) => (
-                      <ListItem
-                        key={index}
-                        alignItems="flex-start"
-                        sx={{ px: 0 }}
-                      >
-                        <ListItemAvatar>
-                          <Avatar>
-                            {review.reviewerName
-                              ? review.reviewerName.charAt(0).toUpperCase()
-                              : "U"}
-                          </Avatar>
-                        </ListItemAvatar>
-                        <ListItemText
-                          primary={review.reviewerName || "Anonymous"}
-                          secondary={
-                            <>
-                              <Rating
-                                value={review.rating}
-                                size="small"
-                                readOnly
-                              />
-                              <Typography variant="body2" color="text.primary">
-                                {review.comment}
-                              </Typography>
-                            </>
-                          }
-                        />
-                      </ListItem>
-                    ))}
-                  </List>
-                </>
-              ) : (
-                <Typography variant="body2" color="text.secondary" mt={2}>
-                  No reviews yet.
-                </Typography>
-              )}
             </Grid>
           </Grid>
         </Box>
@@ -483,18 +359,16 @@ const ProfilePage = () => {
                 onClick={handleEditToggle}
                 disabled={saveLoading}
               >
-                {editMode
-                  ? saveLoading
-                    ? "Saving..."
-                    : "Save Changes"
-                  : "Edit Profile"}
+                {editMode ? (saveLoading ? "Saving..." : "Save Changes") : "Edit Profile"}
               </Button>
             </Box>
           </Box>
+
           <Divider sx={{ mb: 3 }} />
 
           <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
+              {/* Date of Birth */}
               <Box display="flex" alignItems="center" mb={3}>
                 <Cake sx={{ mr: 2, color: "text.secondary" }} />
                 {editMode ? (
@@ -521,6 +395,7 @@ const ProfilePage = () => {
                 )}
               </Box>
 
+              {/* Phone */}
               <Box display="flex" alignItems="center" mb={3}>
                 <Phone sx={{ mr: 2, color: "text.secondary" }} />
                 {editMode ? (
@@ -549,6 +424,7 @@ const ProfilePage = () => {
             </Grid>
 
             <Grid item xs={12} md={6}>
+              {/* Email (read-only) */}
               <Box display="flex" alignItems="center" mb={3}>
                 <Email sx={{ mr: 2, color: "text.secondary" }} />
                 <>
@@ -565,6 +441,7 @@ const ProfilePage = () => {
                 </>
               </Box>
 
+              {/* Address */}
               <Box display="flex" alignItems="flex-start" mb={3}>
                 <Home sx={{ mr: 2, color: "text.secondary", mt: 0.5 }} />
                 {editMode ? (
@@ -572,9 +449,7 @@ const ProfilePage = () => {
                     fullWidth
                     label="Home Address"
                     value={personalInfo.address}
-                    onChange={(e) =>
-                      handleInfoChange("address", e.target.value)
-                    }
+                    onChange={(e) => handleInfoChange("address", e.target.value)}
                     multiline
                     rows={2}
                     placeholder="Enter your full address"
@@ -597,8 +472,37 @@ const ProfilePage = () => {
             </Grid>
           </Grid>
         </Box>
+
+        {/* Items Section with Tabs */}
+        <Box sx={{ ...cardStyle, mt: 4 }}>
+          <Typography variant="h5" gutterBottom>
+            My Items
+          </Typography>
+          <Tabs
+            value={tabValue}
+            onChange={(e, newValue) => setTabValue(newValue)}
+            textColor="primary"
+            indicatorColor="primary"
+            sx={{ mb: 2 }}
+          >
+            <Tab label="Available Items" />
+            <Tab label="Donated Items" />
+          </Tabs>
+
+          {tabValue === 0 && (
+            <Box>
+              <Typography>Currently no items claimable.</Typography>
+            </Box>
+          )}
+          {tabValue === 1 && (
+            <Box>
+              <Typography>List of donated items appears here.</Typography>
+            </Box>
+          )}
+        </Box>
       </Container>
 
+      {/* Snackbar */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}

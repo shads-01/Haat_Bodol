@@ -19,34 +19,63 @@ function LoginRegister() {
             ...formData,
             [e.target.name]: e.target.value
         });
-        // Clear error when user starts typing
         if (error) setError('');
+    };
+
+    // Validation
+    const validateForm = () => {
+        if (!isLogin) {
+            const nameRegex = /^[A-Za-zÀ-ÿ\s\u0980-\u09FF]+$/;
+            if (!nameRegex.test(formData.name.trim())) {
+                setError("Name should only contain letters and spaces.");
+                return false;
+            }
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email.trim())) {
+            setError("Please enter a valid email address.");
+            return false;
+        }
+
+        if (!isLogin) {
+            const phoneRegex = /^01[3-9]\d{8}$/;
+            if (!phoneRegex.test(formData.phone.trim())) {
+                setError("Please enter a valid Bangladeshi phone number (e.g., 017XXXXXXXX).");
+                return false;
+            }
+
+            const address = formData.address.trim();
+            if (address.length < 5 || !/[A-Za-zÀ-ÿ\u0980-\u09FF]/.test(address)) {
+                setError("Please enter a valid address.");
+                return false;
+            }
+        }
+
+        return true;
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true);
         setError('');
 
+        if (!validateForm()) return;
+
+        setLoading(true);
         const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
 
         try {
             const response = await fetch(`http://localhost:5000${endpoint}`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
             });
 
             const data = await response.json();
 
             if (response.ok) {
-                // Save token to localStorage
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
-
-                // Redirect to donations page
                 navigate('/donations');
             } else {
                 setError(data.message || 'An error occurred. Please try again.');
@@ -59,19 +88,31 @@ function LoginRegister() {
         }
     };
 
-    const SwitchContent = () => {
-        setIsLogin(!isLogin);
-    };
+    const SwitchContent = () => setIsLogin(!isLogin);
 
     return (
-        <div className="body">
-            <div className={`content justify-content-center align-items-center d-flex shadow-lg ${!isLogin ? 'active' : ''}`} id='content'>
-                {/* Error message */}
-                {error && (
-                    <div className="alert alert-danger position-absolute top-0 start-50 translate-middle-x mt-3" role="alert">
-                        {error}
-                    </div>
-                )}
+        <div className="body position-relative d-flex flex-column align-items-center">
+
+            {/* Error message - centered above content */}
+            {error && (
+                <div 
+                    className="alert alert-danger text-center shadow-sm"
+                    style={{
+                        position: "absolute",
+                        top: "20px",
+                        zIndex: 1050,
+                        maxWidth: "400px",
+                    }}
+                >
+                    {error}
+                </div>
+            )}
+
+            <div 
+                className={`content justify-content-center align-items-center d-flex shadow-lg mt-5 ${!isLogin ? 'active' : ''}`} 
+                id="content"
+                style={{ position: "relative" }}
+            >
 
                 {/* Register form */}
                 <div className='col-md-6 d-flex justify-content-center'>
@@ -225,6 +266,7 @@ function LoginRegister() {
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
     );
