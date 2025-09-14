@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom";
 import { Container, Row, Col, Card, Badge, Carousel } from "react-bootstrap";
 import { Clock, MapPin } from "lucide-react";
 import axios from "axios";
-import NavigationBar from "./NavigationBar";
 import Footer from "./Footer";
 import "../css/ItemDetails.css";
 import { formatDistanceToNow } from "date-fns";
@@ -11,17 +10,18 @@ import { formatDistanceToNow } from "date-fns";
 function ProductDetails() {
   const { id } = useParams();
   const [item, setItem] = useState(null);
+  const [donor, setDonor] = useState(null);
 
   useEffect(() => {
     const fetchItem = async () => {
       try {
         const res = await axios.get(`http://localhost:5000/api/items/${id}`);
         setItem(res.data);
+        setDonor(res.data.donatedBy);
       } catch (err) {
         console.error("Error fetching item:", err);
       }
     };
-
     fetchItem();
   }, [id]);
 
@@ -70,7 +70,7 @@ function ProductDetails() {
                 )}
                 {/* Item Details */}
                 <div className="px-2">
-                  <hr/>
+                  <hr />
                   <h3 className="mb-2">{item.title}</h3>
                   <h6>
                     {capitalizeWords(item.category)} <strong>.</strong>{" "}
@@ -123,49 +123,63 @@ function ProductDetails() {
             <Col md={12} lg={4}>
               <div className="bg-white rounded shadow-sm p-4">
                 <h4 className="mb-2">Donated By</h4>
+                {donor ? (
+                  <>
+                    <div className="text-center mb-4">
+                      <img
+                        src={donor.profilePic?.url || "/placeholder.png"}
+                        alt="Profile picture"
+                        className="rounded-circle border border-2 border-black"
+                        width={100}
+                        height={100}
+                        onError={(e) => {
+                          e.target.src = "/default-avatar.png";
+                        }}
+                      />
 
-                <div className="text-center mb-4">
-                  <div
-                    className="bg-light rounded-circle d-inline-flex align-items-center justify-content-center"
-                    style={{ width: "80px", height: "80px" }}
-                  >
-                    <span className="h2 text-muted mb-0">
-                      {item.donorName
-                        ? item.donorName.charAt(0).toUpperCase()
-                        : "D"}
-                    </span>
-                  </div>
-                  <h5 className="mt-3 mb-1">
-                    {item.donorName || "Anonymous Donor"}
-                  </h5>
-                </div>
+                      <h5 className="mt-3 mb-1">
+                        {donor.name || "Anonymous Donor"}
+                      </h5>
+                    </div>
 
-                <div className="border-top pt-3">
-                  <div className="mb-2">
-                    <strong>Email: </strong>
-                    <span className="text-muted">
-                      {item.donorEmail || "Not provided"}
-                    </span>
-                  </div>
-                  <div className="mb-2">
-                    <strong>Phone: </strong>
-                    <span className="text-muted">
-                      {item.donorPhone || "Not provided"}
-                    </span>
-                  </div>
-                  <div className="mb-2">
-                    <strong>Member Since: </strong>
-                    <span className="text-muted">
-                      {item.donorJoinedDate
-                        ? new Date(item.donorJoinedDate).toLocaleDateString()
-                        : "N/A"}
-                    </span>
-                  </div>
-                </div>
+                    <div className="border-top pt-3">
+                      <div className="mb-2">
+                        <strong>Email: </strong>
+                        <span className="text-muted">
+                          {donor.email || "Not provided"}
+                        </span>
+                      </div>
+                      <div className="mb-2">
+                        <strong>Phone: </strong>
+                        <span className="text-muted">
+                          {donor.phone || "Not provided"}
+                        </span>
+                      </div>
+                    </div>
 
-                <div className="d-grid gap-2 mt-4">
-                  <button className="btn btn-dark">Request Item</button>
-                </div>
+                    <div className="d-grid gap-2 mt-4">
+                      <button className="btn btn-dark">Request Item</button>
+                    </div>
+                    <div className="d-grid gap-2 mt-4">
+                      <button className="btn btn-dark">Message Donor</button>
+                    </div>
+                  </>
+                ) : (
+                  // Show fallback when no donor info
+                  <div className="text-center">
+                    <img
+                      src="/placeholder.png"
+                      alt="Anonymous donor"
+                      className="rounded-circle border border-2 border-black"
+                      width={60}
+                      height={60}
+                    />
+                    <h5 className="mt-3 mb-1">Anonymous Donor</h5>
+                    <p className="text-muted">
+                      Donor information not available
+                    </p>
+                  </div>
+                )}
               </div>
             </Col>
           </Row>

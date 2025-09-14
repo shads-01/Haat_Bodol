@@ -13,6 +13,7 @@ import {
   CircularProgress,
   Tabs,
   Tab,
+  Paper,
 } from "@mui/material";
 import {
   Edit,
@@ -33,6 +34,8 @@ const ProfilePage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [picLoading, setPicLoading] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
+  const [userItems, setUserItems] = useState([]);
+  const [itemsLoading, setItemsLoading] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -58,6 +61,7 @@ const ProfilePage = () => {
 
   useEffect(() => {
     fetchUserData();
+    fetchUserItems();
   }, []);
 
   const fetchUserData = async () => {
@@ -101,7 +105,8 @@ const ProfilePage = () => {
           name: data.name || "User",
           profilePic: data.profilePic?.url || "",
           joinDate,
-          donations: data.donations || 0,
+          donations: userItems.filter((item) => item.status === "donated")
+            .length,
           claims: data.claims || 0,
           level: data.level || "Bronze",
         });
@@ -123,7 +128,9 @@ const ProfilePage = () => {
         });
       } else {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `Server returned ${response.status}`);
+        throw new Error(
+          errorData.message || `Server returned ${response.status}`
+        );
       }
     } catch (error) {
       console.error("Error fetching user data:", error);
@@ -134,6 +141,60 @@ const ProfilePage = () => {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+  const fetchUserItems = async () => {
+    try {
+      setItemsLoading(true);
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        setSnackbar({
+          open: true,
+          message: "Not authenticated. Please login again.",
+          severity: "error",
+        });
+        return;
+      }
+      const profileResponse = await fetch(
+        "http://localhost:5000/api/auth/profile",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (profileResponse.ok) {
+        const profileData = await profileResponse.json();
+        const userId = profileData._id;
+
+        // Fetch user's items
+        const itemsResponse = await fetch(
+          `http://localhost:5000/api/items/user/${userId}/items`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (itemsResponse.ok) {
+          const itemsData = await itemsResponse.json();
+          setUserItems(itemsData);
+        } else {
+          throw new Error("Failed to fetch items");
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching user items:", error);
+      setSnackbar({
+        open: true,
+        message: "Error loading your items",
+        severity: "error",
+      });
+    } finally {
+      setItemsLoading(false);
     }
   };
 
@@ -214,11 +275,14 @@ const ProfilePage = () => {
       const formData = new FormData();
       formData.append("profilePhoto", file);
       setPicLoading(true);
-      const res = await fetch("http://localhost:5000/api/auth/profile/picture", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        body: formData,
-      });
+      const res = await fetch(
+        "http://localhost:5000/api/auth/profile/picture",
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          body: formData,
+        }
+      );
 
       if (!res.ok) throw new Error("Upload failed");
       const data = await res.json();
@@ -359,7 +423,11 @@ const ProfilePage = () => {
                 onClick={handleEditToggle}
                 disabled={saveLoading}
               >
-                {editMode ? (saveLoading ? "Saving..." : "Save Changes") : "Edit Profile"}
+                {editMode
+                  ? saveLoading
+                    ? "Saving..."
+                    : "Save Changes"
+                  : "Edit Profile"}
               </Button>
             </Box>
           </Box>
@@ -449,7 +517,9 @@ const ProfilePage = () => {
                     fullWidth
                     label="Home Address"
                     value={personalInfo.address}
-                    onChange={(e) => handleInfoChange("address", e.target.value)}
+                    onChange={(e) =>
+                      handleInfoChange("address", e.target.value)
+                    }
                     multiline
                     rows={2}
                     placeholder="Enter your full address"
@@ -483,20 +553,252 @@ const ProfilePage = () => {
             onChange={(e, newValue) => setTabValue(newValue)}
             textColor="primary"
             indicatorColor="primary"
-            sx={{ mb: 2 }}
+            sx={{
+              mb: 2,
+              "& .MuiTab-root": {
+                textTransform: "none",
+              },
+            }}
           >
-            <Tab label="Available Items" />
-            <Tab label="Donated Items" />
+            <Tab
+              label={`Available Items (${
+                userItems.filter(
+                  (item) =>
+                    item.status === "available" || item.status === "reserved"
+                ).length
+              })`}
+            />
+            <Tab
+              label={`Donated Items (${
+                userItems.filter((item) => item.status === "donated").length
+              })`}
+            />
           </Tabs>
 
           {tabValue === 0 && (
             <Box>
-              <Typography>Currently no items claimable.</Typography>
+              {itemsLoading ? (
+                <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
+                  <CircularProgress />
+                </Box>
+              ) : userItems.filter(
+                  (item) =>
+                    item.status === "available" || item.status === "reserved"
+                ).length > 0 ? (
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                  {userItems
+                    .filter(
+                      (item) =>
+                        item.status === "available" ||
+                        item.status === "reserved"
+                    )
+                    .map((item) => (
+                      <Paper
+                        key={item._id}
+                        elevation={2}
+                        sx={{
+                          p: 2,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 2,
+                          "&:hover": {
+                            elevation: 2,
+                            backgroundColor: "#f5f5f5",
+                          },
+                        }}
+                      >
+                        {/* Item Image */}
+                        <Box
+                          component="img"
+                          src={
+                            item.photos[0]?.url ||
+                            "https://placehold.co/600x400"
+                          }
+                          alt={item.title}
+                          sx={{
+                            width: 80,
+                            height: 80,
+                            borderRadius: 2,
+                            objectFit: "cover",
+                            flexShrink: 0,
+                          }}
+                        />
+
+                        {/* Item Details */}
+                        <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                          <Typography variant="h6" component="h3" gutterBottom>
+                            {item.title}
+                          </Typography>
+                          <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
+                            <Chip
+                              label={item.category}
+                              size="small"
+                              color="primary"
+                              variant="outlined"
+                              sx={{ textTransform: "capitalize" }}
+                            />
+                            <Chip
+                              label={item.status || "available"}
+                              size="small"
+                              color={
+                                item.status === "reserved" ? "info" : "success"
+                              }
+                              sx={{ textTransform: "capitalize" }}
+                            />
+                          </Box>
+                        </Box>
+
+                        {/* Status & Actions */}
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "flex-end",
+                            gap: 1,
+                            flexShrink: 0,
+                          }}
+                        >
+                          <Typography variant="caption" color="text.secondary">
+                            {new Date(item.createdAt).toLocaleDateString()}
+                          </Typography>
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            color="info"
+                            onClick={() =>
+                              window.open(`/item/${item._id}`, "_blank")
+                            }
+                          >
+                            View Details
+                          </Button>
+                        </Box>
+                      </Paper>
+                    ))}
+                </Box>
+              ) : (
+                <Box sx={{ textAlign: "center", py: 4 }}>
+                  <Typography variant="h6" color="text.secondary" gutterBottom>
+                    Currently no items claimable.
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Items you donate will appear here until they're claimed.
+                  </Typography>
+                </Box>
+              )}
             </Box>
           )}
           {tabValue === 1 && (
             <Box>
-              <Typography>List of donated items appears here.</Typography>
+              {itemsLoading ? (
+                <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
+                  <CircularProgress />
+                </Box>
+              ) : userItems.filter((item) => item.status === "donated").length >
+                0 ? (
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                  {userItems
+                    .filter((item) => item.status === "donated")
+                    .map((item) => (
+                      <Paper
+                        key={item._id}
+                        elevation={2}
+                        sx={{
+                          p: 2,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 2,
+                          "&:hover": {
+                            elevation: 2,
+                            backgroundColor: "#f5f5f5",
+                          },
+                        }}
+                      >
+                        {/* Item Image */}
+                        <Box
+                          component="img"
+                          src={
+                            item.photos[0]?.url ||
+                            "https://placehold.co/600x400"
+                          }
+                          alt={item.title}
+                          sx={{
+                            width: 80,
+                            height: 80,
+                            borderRadius: 2,
+                            objectFit: "cover",
+                            flexShrink: 0,
+                          }}
+                        />
+
+                        {/* Item Details */}
+                        <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                          <Typography variant="h6" component="h3" gutterBottom>
+                            {item.title}
+                          </Typography>
+                          <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
+                            <Chip
+                              label={item.category}
+                              size="small"
+                              color="primary"
+                              variant="outlined"
+                              sx={{ textTransform: "capitalize" }}
+                            />
+                            <Chip
+                              label={item.status || "available"}
+                              size="small"
+                              color={
+                                item.status === "reserved" ? "info" : "success"
+                              }
+                              sx={{ textTransform: "capitalize" }}
+                            />
+                          </Box>
+                        </Box>
+
+                        {/* Status & Actions */}
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "flex-end",
+                            gap: 1,
+                            flexShrink: 0,
+                          }}
+                        >
+                          <Typography variant="caption" color="text.secondary">
+                            {new Date(item.createdAt).toLocaleDateString()}
+                          </Typography>
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            color="info"
+                            onClick={() =>
+                              window.open(`/item/${item._id}`, "_blank")
+                            }
+                          >
+                            View Details
+                          </Button>
+                        </Box>
+                      </Paper>
+                    ))}
+                </Box>
+              ) : (
+                <Box sx={{ textAlign: "center", py: 4 }}>
+                  <Typography variant="h6" color="text.secondary" gutterBottom>
+                    No items donated yet
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Start donating to help your community!
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    color="info"
+                    sx={{ mt: 2 }}
+                    onClick={() => (window.location.href = "/post-item")}
+                  >
+                    Donate Your First Item
+                  </Button>
+                </Box>
+              )}
             </Box>
           )}
         </Box>

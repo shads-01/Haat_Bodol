@@ -1,14 +1,5 @@
 import Item from "../models/Item.js";
 
-// export async function getAllItems(req, res) {
-//   try {
-//     const items = await Item.find();
-//     res.json(items);
-//   } catch (err) {
-//     res.status(500).json({ error: err.message });
-//   }
-// }
-
 export async function getAllItems(req, res) {
   try {
     const { category } = req.query;
@@ -32,6 +23,7 @@ export async function getAllItems(req, res) {
 export async function createAnItem(req, res) {
   try {
     const { title, description, category, condition, address } = req.body;
+    const userId = req.userId; // From auth middleware
 
     const photoPaths = req.files
       ? req.files.map((file) => ({
@@ -47,6 +39,7 @@ export async function createAnItem(req, res) {
       condition,
       address,
       photos: photoPaths,
+      donatedBy: userId,
     });
 
     res.status(201).json(item);
@@ -57,12 +50,15 @@ export async function createAnItem(req, res) {
 
 export async function getItemById(req, res) {
   try {
-    const item = await Item.findById(req.params.id);
-
-    if (!item) return res.status(404).json({ error: "Item not found" });
+    const item = await Item.findById(req.params.id)
+      .populate('donatedBy', 'name email profilePic phone'); // Populate donor info
+    
+    if (!item) {
+      return res.status(404).json({ message: 'Item not found' });
+    }
     res.json(item);
   } catch (err) {
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ error: err.message });
   }
 }
 
@@ -88,3 +84,17 @@ export async function searchItems(req, res) {
     res.status(500).json({ message: "Internal server error" });
   }
 }
+
+export const getUserItems = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    const items = await Item.find({ donatedBy: userId })
+      .select('title category photos status createdAt')
+      .sort({ createdAt: -1 }); // Most recent first
+    
+    res.json(items);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch user items' });
+  }
+};

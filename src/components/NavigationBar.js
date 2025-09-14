@@ -17,7 +17,7 @@ import {
   NavDropdown,
 } from "react-bootstrap";
 import { NavLink } from "react-router-dom";
-import { MessageSquareText, Bell, Search, Menu, X } from "lucide-react";
+import { MessageSquareText, Bell, Search, Menu, X, User, LogOut } from "lucide-react";
 import toast from "react-hot-toast";
 
 function NavigationBar() {
@@ -146,7 +146,7 @@ function NavigationBar() {
         <Container fluid className="d-flex align-items-center">
           <Row className="w-100 d-flex align-items-center justify-content-between">
             <Col xs="auto" className="d-flex align-items-center">
-              <NavLink to="/donations" className="py-1 px-4">
+              <NavLink className="py-1 px-4" onClick={() => window.location.href  = '/donations'}>
                 <img src="/logo.jpg" alt="logo" width={100} height={60} />
               </NavLink>
             </Col>
@@ -265,6 +265,7 @@ function NavigationBar() {
                         className="d-flex align-items-center"
                       >
                         <i className="fas fa-user me-2"></i>
+                        <User size={20} className="me-2"/>
                         Profile
                       </NavDropdown.Item>
                       <NavDropdown.Divider />
@@ -274,6 +275,7 @@ function NavigationBar() {
                         style={{ cursor: "pointer" }}
                       >
                         <i className="fas fa-sign-out-alt me-2"></i>
+                        <LogOut size={20} className="me-2"/>
                         Sign Out
                       </NavDropdown.Item>
                     </NavDropdown>
@@ -318,6 +320,7 @@ function NavigationBar() {
                       className="d-flex align-items-center"
                     >
                       <i className="fas fa-user me-2"></i>
+                      <User size={20} className="me-2"/>
                       Profile
                     </NavDropdown.Item>
                     <NavDropdown.Divider />
@@ -327,6 +330,7 @@ function NavigationBar() {
                       style={{ cursor: "pointer" }}
                     >
                       <i className="fas fa-sign-out-alt me-2"></i>
+                      <LogOut size={20} className="me-2"/>
                       Sign Out
                     </NavDropdown.Item>
                   </NavDropdown>
