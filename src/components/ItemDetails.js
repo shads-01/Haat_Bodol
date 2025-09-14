@@ -122,40 +122,61 @@ function ProductDetails() {
             {/* Right Column - Donor Information */}
             <Col md={12} lg={4}>
               <div className="bg-white rounded shadow-sm p-4">
-                <h4 className="mb-4 text-center">Donated By</h4>
+                <h4 className="mb-2">Donated By</h4>
+                {donor ? (
+                  <>
+                    <div className="text-center mb-4">
+                      <img
+                        src={donor.profilePic?.url || "/placeholder.png"}
+                        alt="Profile picture"
+                        className="rounded-circle border border-2 border-black"
+                        width={100}
+                        height={100}
+                        onError={(e) => {
+                          e.target.src = "/default-avatar.png";
+                        }}
+                      />
 
-                <div className="text-center mb-4">
-                  <img
-                    src={donor.profilePic?.url || "/placeholder.png"}
-                    alt="Profile picture"
-                    className="rounded-circle border border-2 border-black"
-                    width={100}
-                    height={100}
-                  />
+                      <h5 className="mt-3 mb-1">
+                        {donor.name || "Anonymous Donor"}
+                      </h5>
+                    </div>
 
-                  <h5 className="mt-3 mb-1">
-                    {donor.name || "Anonymous Donor"}
-                  </h5>
-                </div>
+                    <div className="border-top pt-3">
+                      <div className="mb-2">
+                        <strong>Email: </strong>
+                        <span className="text-muted">
+                          {donor.email || "Not provided"}
+                        </span>
+                      </div>
+                      <div className="mb-2">
+                        <strong>Phone: </strong>
+                        <span className="text-muted">
+                          {donor.phone || "Not provided"}
+                        </span>
+                      </div>
+                    </div>
 
-                <div className="border-top pt-3">
-                  <div className="mb-2">
-                    <strong>Email: </strong>
-                    <span className="text-muted">
-                      {donor.email || "Not provided"}
-                    </span>
+                    <div className="d-grid gap-2 mt-4">
+                      <button className="btn btn-dark">Request Item</button>
+                    </div>
+                  </>
+                ) : (
+                  // Show fallback when no donor info
+                  <div className="text-center">
+                    <img
+                      src="/placeholder.png"
+                      alt="Anonymous donor"
+                      className="rounded-circle border border-2 border-black"
+                      width={60}
+                      height={60}
+                    />
+                    <h5 className="mt-3 mb-1">Anonymous Donor</h5>
+                    <p className="text-muted">
+                      Donor information not available
+                    </p>
                   </div>
-                  <div className="mb-2">
-                    <strong>Phone: </strong>
-                    <span className="text-muted">
-                      {donor.phone || "Not provided"}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="d-grid gap-2 mt-4">
-                  <button className="btn btn-dark">Request Item</button>
-                </div>
+                )}
               </div>
             </Col>
           </Row>
