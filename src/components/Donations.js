@@ -26,6 +26,7 @@ function Donations() {
   const navigate = useNavigate();
   const [show, setShow] = useState(false);
   const [items, setItems] = useState([]);
+  const [filteredItems, setFilteredItems] = useState([]);
   const [isFetching, setIsFetching] = useState(true);
 
   const handleClose = () => setShow(false);
@@ -33,7 +34,167 @@ function Donations() {
 
   const [sortByNewest, setSortByNewest] = useState(false);
 
+  // Filter states - active filters applied to items
+  const [appliedFilters, setAppliedFilters] = useState({
+    status: {
+      reserved: false,
+      notReserved: false
+    },
+    timeListed: '',
+    condition: {
+      good: false,
+      likeNew: false,
+      used: false,
+      broken: false
+    }
+  });
+
+  // Temporary filters - what user is selecting
+  const [tempFilters, setTempFilters] = useState({
+    status: {
+      reserved: false,
+      notReserved: false
+    },
+    timeListed: '',
+    condition: {
+      good: false,
+      likeNew: false,
+      used: false,
+      broken: false
+    }
+  });
+
   const location = useLocation();
+
+  // Handle filter changes
+  const handleStatusChange = (statusType, checked) => {
+    setTempFilters(prev => ({
+      ...prev,
+      status: {
+        ...prev.status,
+        [statusType]: checked
+      }
+    }));
+  };
+  const handleTimeListedChange = (timeRange) => {
+    setTempFilters(prev => ({
+      ...prev,
+      timeListed: timeRange
+    }));
+  };
+  const handleConditionChange = (conditionType, checked) => {
+    setTempFilters(prev => ({
+      ...prev,
+      condition: {
+        ...prev.condition,
+        [conditionType]: checked
+      }
+    }));
+  };
+
+  // Apply filters - move temp filters to applied filters
+  const applyFilters = () => {
+    setAppliedFilters({...tempFilters});
+    handleClose();
+  };
+
+  // Clear all filters
+  const clearAllFilters = () => {
+    const resetFilters = {
+      status: {
+        reserved: false,
+        notReserved: false
+      },
+      timeListed: '',
+      condition: {
+        good: false,
+        likeNew: false,
+        used: false,
+        broken: false
+      }
+    };
+    setTempFilters(resetFilters);
+    setAppliedFilters(resetFilters);
+  };
+
+  // Apply filters to items
+  const filterItems = (itemsToFilter) => {
+    let filtered = [...itemsToFilter];
+
+    // Status filter
+    const { reserved, notReserved } = appliedFilters.status;
+    if (reserved || notReserved) {
+      filtered = filtered.filter(item => {
+        if (reserved && notReserved) return true;
+        if (reserved) return item.status === 'reserved';
+        if (notReserved) return item.status === 'available';
+        return true;
+      });
+    }
+
+    // Time listed filter
+    if (appliedFilters.timeListed) {
+      const now = new Date();
+      const itemDate = (item) => new Date(item.createdAt);
+
+      filtered = filtered.filter(item => {
+        const createdAt = itemDate(item);
+        const diffInHours = (now - createdAt) / (1000 * 60 * 60);
+        const diffInDays = diffInHours / 24;
+
+        switch (appliedFilters.timeListed) {
+          case '24hours':
+            return diffInHours <= 24;
+          case '7days':
+            return diffInDays <= 7;
+          case '30days':
+            return diffInDays <= 30;
+          default:
+            return true;
+        }
+      });
+    }
+    // Condition filter
+    const conditionFilters = appliedFilters.condition;
+    const activeConditions = Object.entries(conditionFilters)
+      .filter(([_, isActive]) => isActive)
+      .map(([condition, _]) => condition);
+
+    if (activeConditions.length > 0) {
+      filtered = filtered.filter(item => {
+        const itemCondition = item.condition?.toLowerCase();
+        return activeConditions.some(condition => {
+          switch (condition) {
+            case 'good':
+              return itemCondition === 'good';
+            case 'likeNew':
+              return itemCondition === 'like-new';
+            case 'used':
+              return itemCondition === 'used';
+            case 'broken':
+              return itemCondition === 'broken';
+            default:
+              return false;
+          }
+        });
+      });
+    }
+    return filtered;
+  };
+  // Sort items
+  const sortItems = (itemsToSort) => {
+    if (!sortByNewest) return itemsToSort;
+    
+    return [...itemsToSort].sort((a, b) => {
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    });
+  };
+  // Apply filters and sorting
+  useEffect(() => {
+    const filtered = filterItems(items);
+    const sorted = sortItems(filtered);
+    setFilteredItems(sorted);
+  }, [items, appliedFilters, sortByNewest]);
 
   useEffect(() => {
     const fetchItems = async () => {
@@ -54,11 +215,6 @@ function Donations() {
           )}`;
         }
 
-        //add sort parameter if sortByNewest is true
-        if (sortByNewest && !searchQuery) {
-          url += (url.includes("?") ? "&" : "?") + "sort=desc";
-        }
-
         const res = await axios.get(url);
         setItems(res.data);
       } catch (err) {
@@ -69,7 +225,7 @@ function Donations() {
     };
 
     fetchItems();
-  }, [location.search, sortByNewest]);
+  }, [location.search]);
 
   if (isFetching) {
     return (
@@ -177,13 +333,18 @@ function Donations() {
                       type="checkbox"
                       label="Reserved"
                       id="statusReserved"
+                      checked={tempFilters.status.reserved}
+                      onChange={(e) => handleStatusChange('reserved', e.target.checked)}
                     />
                     <Form.Check
                       type="checkbox"
-                      label="Not Reserved"
+                      label="Available"
                       id="statusNotReserved"
+                      checked={tempFilters.status.notReserved}
+                      onChange={(e) => handleStatusChange('notReserved', e.target.checked)}
                     />
                   </div>
+                  
                   {/* Time Listed Filter */}
                   <div className="mb-4">
                     <h5>Time Listed</h5>
@@ -192,18 +353,32 @@ function Donations() {
                       name="timeListed"
                       label="Last 24 hours"
                       id="hr24"
+                      checked={tempFilters.timeListed === '24hours'}
+                      onChange={() => handleTimeListedChange('24hours')}
                     />
                     <Form.Check
                       type="radio"
                       name="timeListed"
                       label="Last 7 days"
                       id="day7"
+                      checked={tempFilters.timeListed === '7days'}
+                      onChange={() => handleTimeListedChange('7days')}
                     />
                     <Form.Check
                       type="radio"
                       name="timeListed"
                       label="Last month"
                       id="monthLast"
+                      checked={tempFilters.timeListed === '30days'}
+                      onChange={() => handleTimeListedChange('30days')}
+                    />
+                    <Form.Check
+                      type="radio"
+                      name="timeListed"
+                      label="All time"
+                      id="allTime"
+                      checked={tempFilters.timeListed === ''}
+                      onChange={() => handleTimeListedChange('')}
                     />
                   </div>
                   {/* Condition Filter */}
@@ -211,31 +386,47 @@ function Donations() {
                     <h5>Condition</h5>
                     <Form.Check
                       type="checkbox"
-                      label="Like New"
-                      id="conditionNew"
+                      label="Good"
+                      id="conditionGood"
+                      checked={tempFilters.condition.good}
+                      onChange={(e) => handleConditionChange('good', e.target.checked)}
                     />
                     <Form.Check
                       type="checkbox"
-                      label="New"
+                      label="Like New"
                       id="conditionLikeNew"
+                      checked={tempFilters.condition.likeNew}
+                      onChange={(e) => handleConditionChange('likeNew', e.target.checked)}
                     />
                     <Form.Check
                       type="checkbox"
                       label="Used"
                       id="conditionUsed"
+                      checked={tempFilters.condition.used}
+                      onChange={(e) => handleConditionChange('used', e.target.checked)}
                     />
                     <Form.Check
                       type="checkbox"
-                      label="Damaged"
-                      id="conditionDamaged"
+                      label="Broken"
+                      id="conditionBroken"
+                      checked={tempFilters.condition.broken}
+                      onChange={(e) => handleConditionChange('broken', e.target.checked)}
                     />
                   </div>
                   {/* Apply / Clear Buttons */}
                   <div className="mt-auto d-flex justify-content-between ac-btn">
-                    <Button variant="secondary" size="sm">
+                    <Button 
+                      variant="secondary" 
+                      size="sm"
+                      onClick={clearAllFilters}
+                    >
                       Clear All
                     </Button>
-                    <Button variant="dark" size="sm">
+                    <Button 
+                      variant="dark" 
+                      size="sm"
+                      onClick={applyFilters}
+                    >
                       Apply Filters
                     </Button>
                   </div>
@@ -247,7 +438,7 @@ function Donations() {
 
         {/* Responsive card grid */}
         <Row className="g-2 g-md-4 my-2">
-          {items.map((item, index) => (
+          {filteredItems.map((item, index) => (
             <Col
               key={index}
               xs={12}
@@ -334,9 +525,9 @@ function Donations() {
             </Col>
           ))}
 
-          {items.length === 0 && (
+          {filteredItems.length === 0 && !isFetching && (
             <div className="text-center my-5">
-              <h5>No items found for your search.</h5>
+              <h5>No items found.</h5>
             </div>
           )}
         </Row>
@@ -344,4 +535,5 @@ function Donations() {
     </div>
   );
 }
+
 export default Donations;

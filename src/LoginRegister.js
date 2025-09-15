@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
 function LoginRegister() {
@@ -77,6 +78,8 @@ function LoginRegister() {
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
                 navigate('/donations');
+                if (isLogin) toast.success("Welcome back!");
+                else toast.success("Welcome! You've just joined a community built on trust.");
             } else {
                 setError(data.message || 'An error occurred. Please try again.');
             }
