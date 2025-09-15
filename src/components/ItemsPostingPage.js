@@ -1,6 +1,5 @@
 import React, { use, useState } from "react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
-import NavigationBar from "./NavigationBar";
 import "../css/PostItem.css";
 import PhotoUploadBox from "./PhotoUploadBox";
 import axios from "axios";
@@ -10,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 function ItemsPostingPage() {
   const [loading, setLoading] = useState(false);
   const [photos, setPhotos] = useState([null, null, null, null]);
+  const [locationLoading, setLocationLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -42,7 +42,6 @@ function ItemsPostingPage() {
     if (file && !validateImage(file)) {
       return;
     }
-
     const newPhotos = [...photos];
     newPhotos[index] = file;
     setPhotos(newPhotos);
@@ -71,6 +70,44 @@ function ItemsPostingPage() {
       return false;
     }
     return true;
+  };
+  const getMyLocation = async () => {
+    setLocationLoading(true);
+
+    try {
+      const token = localStorage.getItem("token");
+
+      // Fetch user profile data
+      const response = await axios.get("http://localhost:5000/api/auth/profile", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const userData = response.data;
+
+      // Check if user has an address saved
+      if (userData.address && userData.address.trim()) {
+        handleInput("address", userData.address);
+        toast.success("Your saved location has been added!");
+      } else {
+        toast.error(
+          "No saved address found. Please update your profile first."
+        );
+      }
+    } catch (error) {
+      console.log("Error fetching user location:", error);
+
+      if (error.response?.status === 401) {
+        toast.error("Please login to use this feature");
+      } else if (error.response?.status === 404) {
+        toast.error("User profile not found");
+      } else {
+        toast.error("Couldn't fetch your saved location");
+      }
+    } finally {
+      setLocationLoading(false);
+    }
   };
 
   const handleInput = (key, value) => {
@@ -260,11 +297,28 @@ function ItemsPostingPage() {
                   type="text"
                   placeholder="Enter an address"
                   className="bg-light px-3 py-2"
+                  value={formData.address}
                   onChange={(e) => handleInput("address", e.target.value)}
                 />
                 <div className="fs-6 text-center my-2 fw-semibold">or</div>
-                <Button variant="outline-dark" className="w-100">
-                  Current Location
+                <Button
+                  variant="outline-dark"
+                  className="w-100"
+                  onClick={getMyLocation}
+                  disabled={locationLoading}
+                >
+                  {locationLoading ? (
+                    <>
+                      <span
+                        className="spinner-border spinner-border-sm me-2"
+                        role="status"
+                        aria-hidden="true"
+                      ></span>
+                      Loading...
+                    </>
+                  ) : (
+                    "My Location"
+                  )}
                 </Button>
               </div>
 
