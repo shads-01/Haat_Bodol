@@ -1,36 +1,47 @@
 import { io } from 'socket.io-client';
+import { logger } from './logger';
 
 class SocketService {
   constructor() {
     this.socket = null;
     this.isConnected = false;
+    this.connectionAttempts = 0;
   }
 
   connect(token) {
     // Prevent multiple connections
     if (this.isConnected && this.socket) {
-      console.log('Socket already connected, returning existing connection');
+      logger.debug('Socket already connected, returning existing connection');
       return this.socket;
     }
+    logger.info('Establishing socket connection...');
+    this.connectionAttempts++;
 
     this.socket = io('http://localhost:5000', {
       auth: { token },
-      transports: ['websocket', 'polling'] // Better connection handling
+      transports: ['websocket', 'polling'],
+      reconnectionAttempts: 5, // Limit reconnection attempts
+      timeout: 60000 
     });
 
     this.socket.on('connect', () => {
-      console.log('✅ Connected to server');
+      logger.info('Connected to server');
       this.isConnected = true;
+      this.connectionAttempts = 0;
     });
 
     this.socket.on('disconnect', (reason) => {
-      console.log('❌ Disconnected from server:', reason);
+      logger.log('Disconnected from server:', reason);
       this.isConnected = false;
     });
 
     this.socket.on('connect_error', (error) => {
-      console.error('Connection error:', error);
+      logger.error('Connection error:', error.message);
       this.isConnected = false;
+    });
+
+    this.socket.on('reconnect_attempt', (attempt) => {
+      logger.debug(`Reconnection attempt ${attempt}`);
     });
 
     return this.socket;
@@ -48,13 +59,8 @@ class SocketService {
       this.socket.disconnect();
       this.socket = null;
       this.isConnected = false;
-      console.log('Socket disconnected');
+      logger.log('Socket disconnected');
     }
-  }
-
-  // New method to check connection status
-  isConnected() {
-    return this.isConnected;
   }
 }
 

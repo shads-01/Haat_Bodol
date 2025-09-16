@@ -218,7 +218,7 @@ function ProductDetails() {
                         width={100}
                         height={100}
                         onError={(e) => {
-                          e.target.src = "/default-avatar.png";
+                          e.target.src = "/placeholder.png";
                         }}
                       />
 
