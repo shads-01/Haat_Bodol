@@ -87,7 +87,6 @@ function ItemsPostingPage() {
         }
 
       );
-      console.log(token);
       const userData = response.data;
 
       // Check if user has an address saved

@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const NotificationSchema = new mongoose.Schema({
   recipient: { 
@@ -14,14 +14,12 @@ const NotificationSchema = new mongoose.Schema({
     type: String, 
     required: true, 
     enum: [
-      'donation_request',
-      'donation_approved',
-      'donation_rejected',
+      'item_request', 
+      'donation_request',  
       'exchange_offer',
-      'exchange_accepted',
-      'exchange_rejected',
+      'transaction_update',
       'new_message',
-      'system_alert'
+      'system_alert',
     ] 
   },
   title: { 
@@ -35,7 +33,7 @@ const NotificationSchema = new mongoose.Schema({
   relatedEntity: {
     type: { 
       type: String, 
-      enum: ['Donation', 'Exchange', 'Message'] 
+      enum: ['Item', 'Donation', 'Exchange', 'Message']
     },
     id: { 
       type: mongoose.Schema.Types.ObjectId 
@@ -51,7 +49,4 @@ const NotificationSchema = new mongoose.Schema({
   }
 });
 
-// Index for faster queries
-NotificationSchema.index({ recipient: 1, read: 1, createdAt: -1 });
-
-export default mongoose.model("Notification", NotificationSchema);
+export default mongoose.model('Notification', NotificationSchema);
