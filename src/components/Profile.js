@@ -445,7 +445,7 @@ const ProfilePage = () => {
                     label="Date of Birth"
                     value={personalInfo.dob}
                     onChange={(e) => handleInfoChange("dob", e.target.value)}
-                    placeholder="e.g., May 23, 2001"
+                    placeholder="e.g., 23/05/2001"
                   />
                 ) : (
                   <>
