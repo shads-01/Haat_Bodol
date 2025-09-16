@@ -10,8 +10,10 @@ const router = express.Router();
 router.get('/conversations', auth, async (req, res) => {
   try {
     const conversations = await Conversation.find({
-      participants: req.user.id,
-      participants: { $size: 2 } // Only get conversations with exactly 2 participants
+      $and: [
+        { participants: req.user.id },
+        { participants: { $size: 2 } } // Only get conversations with exactly 2 participants
+      ]
     })
       .populate({
         path: 'participants',

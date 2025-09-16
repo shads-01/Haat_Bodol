@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import jwt from 'jsonwebtoken';
+import cookieParser from 'cookie-parser';
 import itemRoutes from "./routes/itemRoutes.js";
 import authRoutes from "./routes/auth.js";
 import chatRoutes from "./routes/chat.js";
@@ -24,8 +25,12 @@ const io = new Server(httpServer, {
   }
 });
 
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true
+}));
 app.use(express.json());
+app.use(cookieParser());
 
 // Routes
 app.get("/", (req, res) => {
