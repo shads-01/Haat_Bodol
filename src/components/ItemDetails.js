@@ -1,17 +1,21 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom"; // Add useNavigate
-import { Container, Row, Col, Card, Badge, Carousel } from "react-bootstrap";
+import { useParams, useNavigate } from "react-router-dom";
+import { Container, Row, Col, Card, Badge, Carousel, Alert } from "react-bootstrap";
 import { Clock, MapPin } from "lucide-react";
 import axios from "axios";
 import Footer from "./Footer";
 import "../css/ItemDetails.css";
 import { formatDistanceToNow } from "date-fns";
+import { socketService } from "../utils/socket"; // Import socket service
+import { notificationAPI } from "../services/notificationService"; 
 
 function ProductDetails() {
   const { id } = useParams();
-  const navigate = useNavigate(); // Add this line
+  const navigate = useNavigate();
   const [item, setItem] = useState(null);
   const [donor, setDonor] = useState(null);
+  const [isRequesting, setIsRequesting] = useState(false);
+  const [requestStatus, setRequestStatus] = useState(''); // 'success', 'error', ''
 
   useEffect(() => {
     const fetchItem = async () => {
@@ -40,12 +44,43 @@ function ProductDetails() {
     // Navigate to chat page with donor ID
     navigate('/chat', { state: { startChatWith: donor._id } });
   };
+  const handleRequestItem = async () => {
+    if (!donor || !item) return;
+    
+    try {
+      setIsRequesting(true);
+      setRequestStatus('');
+
+      // Send notification to donor
+      await notificationAPI.sendItemRequest(
+        donor._id, 
+        item._id, 
+        item.title
+      );
+      
+      setRequestStatus('success');
+      
+      // Optional: You can also emit a socket event if needed
+      const socket = socketService.getSocket();
+      socket.emit('item-requested', {
+        donorId: donor._id,
+        itemId: item._id,
+        itemName: item.title
+      });
+      
+    } catch (error) {
+      console.error('Error sending item request:', error);
+      setRequestStatus('error');
+    } finally {
+      setIsRequesting(false);
+    }
+  };
 
   if (!item) return <p className="text-center mt-5">Item not found</p>;
 
   return (
     <>
-      <div style={{ minHeight: "100vh", backgroundColor: "rgb(243,238,230)" }}>
+      <div style={{ minHeight: "70vh", backgroundColor: "rgb(243,238,230)" }}>
         <Container className="py-4">
           <Row className="d-flex justify-content-center">
             {/* Left Column - Item Details */}
@@ -128,7 +163,7 @@ function ProductDetails() {
             </Col>
 
             {/* Right Column - Donor Information */}
-            <Col md={12} lg={4}>
+<Col md={12} lg={4}>
               <div className="bg-white rounded shadow-sm p-4">
                 <h4 className="mb-2">Donated By</h4>
                 {donor ? (
@@ -166,16 +201,44 @@ function ProductDetails() {
                     </div>
 
                     <div className="d-grid gap-2 mt-4">
-                      <button className="btn btn-dark">Request Item</button>
+                      <button 
+                        className="btn btn-dark" 
+                        onClick={handleRequestItem}
+                        disabled={isRequesting || item.status !== 'available'}
+                      >
+                        {isRequesting ? (
+                          <>
+                            <span className="spinner-border spinner-border-sm me-2" />
+                            Sending Request...
+                          </>
+                        ) : (
+                          item.status === 'available' ? 'Request Item' : 'Not Available'
+                        )}
+                      </button>
+                      
+                      {requestStatus === 'success' && (
+                        <Alert variant="success" className="mt-2 mb-0 small">
+                          Request sent! The donor will be notified.
+                        </Alert>
+                      )}
+                      
+                      {requestStatus === 'error' && (
+                        <Alert variant="danger" className="mt-2 mb-0 small">
+                          Failed to send request. Please try again.
+                        </Alert>
+                      )}
                     </div>
-                    <div className="d-grid gap-2 mt-4">
-                      <button className="btn btn-dark" onClick={handleMessageDonor}>
+                    
+                    <div className="d-grid gap-2 mt-3">
+                      <button 
+                        className="btn btn-outline-dark" 
+                        onClick={handleMessageDonor}
+                      >
                         Message Donor
                       </button>
                     </div>
                   </>
                 ) : (
-                  // Show fallback when no donor info
                   <div className="text-center">
                     <img
                       src="/placeholder.png"
