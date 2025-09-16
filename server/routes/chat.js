@@ -10,19 +10,35 @@ const router = express.Router();
 router.get('/conversations', auth, async (req, res) => {
   try {
     const conversations = await Conversation.find({
-      participants: req.user.id
+      participants: req.user.id,
+      participants: { $size: 2 } // Only get conversations with exactly 2 participants
     })
-    .populate('participants', 'name email profilePic')
-    .populate('lastMessage')
-    .sort({ updatedAt: -1 });
+      .populate({
+        path: 'participants',
+        select: 'name email profilePic',
+        match: { _id: { $ne: req.user.id } } // Exclude current user
+      })
+      .populate('lastMessage')
+      .sort({ updatedAt: -1 });
+
+    // Keep only the most recent conversation per other user (dedupe duplicates)
+    const deduped = [];
+    const seen = new Set();
+    for (const convo of conversations) {
+      if (!convo.participants || convo.participants.length === 0) continue;
+      const otherUser = convo.participants[0];
+      const uid = otherUser && otherUser._id ? otherUser._id.toString() : null;
+      if (!uid) continue;
+      if (seen.has(uid)) continue; // already have a more recent convo for this user
+      seen.add(uid);
+      deduped.push(convo);
+    }
 
     // Format response to include user info and unread count
     const formattedConversations = await Promise.all(
-      conversations.map(async (convo) => {
-        const otherUser = convo.participants.find(
-          participant => participant._id.toString() !== req.user.id
-        );
-        
+      deduped.map(async (convo) => {
+        const otherUser = convo.participants[0];
+
         // Count unread messages
         const unreadCount = await Message.countDocuments({
           sender: otherUser._id,
@@ -31,7 +47,7 @@ router.get('/conversations', auth, async (req, res) => {
         });
 
         return {
-          _id: otherUser._id, // Using user ID as conversation identifier
+          _id: convo._id,
           user: otherUser,
           lastMessage: convo.lastMessage,
           unreadCount
@@ -41,6 +57,7 @@ router.get('/conversations', auth, async (req, res) => {
 
     res.json(formattedConversations);
   } catch (error) {
+    console.error('Error loading conversations:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
@@ -54,12 +71,13 @@ router.get('/messages/:userId', auth, async (req, res) => {
         { sender: req.params.userId, receiver: req.user.id }
       ]
     })
-    .populate('sender', 'name profilePic')
-    .populate('receiver', 'name profilePic')
-    .sort({ timestamp: 1 });
+      .populate('sender', 'name profilePic')
+      .populate('receiver', 'name profilePic')
+      .sort({ timestamp: 1 });
 
     res.json(messages);
   } catch (error) {
+    console.error('Error loading messages:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
@@ -68,7 +86,7 @@ router.get('/messages/:userId', auth, async (req, res) => {
 router.get('/search-users', auth, async (req, res) => {
   try {
     const { query } = req.query;
-    
+
     if (!query) {
       return res.json([]);
     }
@@ -87,6 +105,7 @@ router.get('/search-users', auth, async (req, res) => {
 
     res.json(users);
   } catch (error) {
+    console.error('Error searching users:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
@@ -100,6 +119,34 @@ router.get('/user/:userId', auth, async (req, res) => {
     }
     res.json(user);
   } catch (error) {
+    console.error('Error getting user:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// Create or get conversation between two users
+router.post('/conversation/:userId', auth, async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Check if conversation already exists (ensure exactly 2 participants)
+    const participants = Array.from(new Set([req.user.id, userId])).sort();
+    if (participants.length !== 2) {
+      return res.status(400).json({ message: 'Conversation must have two distinct participants' });
+    }
+
+    // Atomic upsert to avoid creating duplicate conversations
+    const filter = { 'participants.0': participants[0], 'participants.1': participants[1] };
+    const update = { $setOnInsert: { participants }, $set: { updatedAt: new Date() } };
+    const options = { upsert: true, new: true, setDefaultsOnInsert: true };
+
+    let conversation = await Conversation.findOneAndUpdate(filter, update, options)
+      .populate('participants', 'name email profilePic')
+      .populate('lastMessage');
+
+    res.json(conversation);
+  } catch (error) {
+    console.error('Error creating conversation:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
