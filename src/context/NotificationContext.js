@@ -1,6 +1,7 @@
 import { useState, useEffect, createContext, useContext } from "react";
 import { socketService } from "../utils/socket";
 import { notificationAPI } from "../services/notificationService"; // Add this import
+import toast from "react-hot-toast";
 
 const NotificationContext = createContext();
 
@@ -17,6 +18,46 @@ export const useNotifications = () => {
 export const NotificationProvider = ({ children }) => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    const initializeNotifications = async () => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        try {
+          // Fetch initial notifications
+          const initialNotifications = await notificationAPI.getNotifications();
+          setNotifications(initialNotifications);
+
+          // Calculate initial unread count
+          const initialUnread = initialNotifications.filter(
+            (n) => !n.read
+          ).length;
+          setUnreadCount(initialUnread);
+
+          // Connect to socket for real-time updates
+          const socket = socketService.connect(token);
+
+          socket.on("new-notification", (notification) => {
+            setNotifications((prev) => [notification, ...prev]);
+            setUnreadCount((prev) => prev + 1);
+
+            // KEEP THIS TOAST FOR REAL-TIME NOTIFICATIONS! 🎯
+            toast.success(notification.message || "New notification!");
+          });
+
+          // Cleanup
+          return () => {
+            socket.off("new-notification");
+            socketService.disconnect();
+          };
+        } catch (error) {
+          console.error("Error initializing notifications:", error);
+        }
+      }
+    };
+
+    initializeNotifications();
+  }, []);
 
   useEffect(() => {
     const initializeNotifications = async () => {

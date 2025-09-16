@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Bell, CheckCircle, XCircle, Trash2, MoreVertical } from 'lucide-react';
 import { Dropdown, Badge, ListGroup, Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { useNotifications } from '../context/NotificationContext';
+import { toast } from 'react-hot-toast'; // ← ADD THIS IMPORT
 
 const NotificationDropdown = () => {
   const { 
@@ -22,7 +23,6 @@ const NotificationDropdown = () => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setShowDropdown(false);
-        // Close all delete menus when dropdown closes
         setShowDeleteMenu({});
       }
     };
@@ -32,21 +32,41 @@ const NotificationDropdown = () => {
   }, []);
 
   const handleMarkAsRead = async (notificationId) => {
-    await markAsRead(notificationId);
+    try {
+      await markAsRead(notificationId);
+      toast.success('Marked as read');
+    } catch (error) {
+      toast.error('Failed to mark as read');
+    }
   };
 
   const handleMarkAllAsRead = async () => {
-    await markAllAsRead();
+    try {
+      await markAllAsRead();
+      toast.success('All notifications marked as read');
+    } catch (error) {
+      toast.error('Failed to mark all as read');
+    }
   };
 
   const handleDeleteNotification = async (notificationId) => {
-    await deleteNotification(notificationId);
-    setShowDeleteMenu(prev => ({ ...prev, [notificationId]: false }));
+    try {
+      await deleteNotification(notificationId);
+      setShowDeleteMenu(prev => ({ ...prev, [notificationId]: false }));
+      toast.success('Notification deleted');
+    } catch (error) {
+      toast.error('Failed to delete notification');
+    }
   };
 
   const handleDeleteAllNotifications = async () => {
     if (window.confirm('Are you sure you want to delete all notifications?')) {
-      await deleteAllNotifications();
+      try {
+        await deleteAllNotifications();
+        toast.success('All notifications deleted');
+      } catch (error) {
+        toast.error('Failed to delete all notifications');
+      }
     }
   };
 
@@ -107,26 +127,34 @@ const NotificationDropdown = () => {
             <h6 className="mb-0 fw-bold">Notifications</h6>
             <div className="d-flex gap-1">
               {unreadCount > 0 && (
-                <Button 
-                  variant="link" 
-                  size="sm" 
-                  className="p-0 text-primary"
-                  onClick={handleMarkAllAsRead}
-                  title="Mark all as read"
+                <OverlayTrigger
+                  placement="top"
+                  overlay={<Tooltip>Mark all as read</Tooltip>}
                 >
-                  <CheckCircle size={16} />
-                </Button>
+                  <Button 
+                    variant="link" 
+                    size="sm" 
+                    className="p-0 text-primary"
+                    onClick={handleMarkAllAsRead}
+                  >
+                    <CheckCircle size={16} />
+                  </Button>
+                </OverlayTrigger>
               )}
               {notifications.length > 0 && (
-                <Button 
-                  variant="link" 
-                  size="sm" 
-                  className="p-0 text-danger"
-                  onClick={handleDeleteAllNotifications}
-                  title="Delete all notifications"
+                <OverlayTrigger
+                  placement="top"
+                  overlay={<Tooltip>Delete all notifications</Tooltip>}
                 >
-                  <Trash2 size={16} />
-                </Button>
+                  <Button 
+                    variant="link" 
+                    size="sm" 
+                    className="p-0 text-danger"
+                    onClick={handleDeleteAllNotifications}
+                  >
+                    <Trash2 size={16} />
+                  </Button>
+                </OverlayTrigger>
               )}
             </div>
           </div>
@@ -190,14 +218,6 @@ const NotificationDropdown = () => {
                 </ListGroup.Item>
               ))}
             </ListGroup>
-          )}
-
-          {notifications.length > 10 && (
-            <div className="text-center mt-2">
-              <Button variant="outline-primary" size="sm">
-                View all notifications ({notifications.length})
-              </Button>
-            </div>
           )}
         </Dropdown.Menu>
       </Dropdown>
