@@ -158,7 +158,7 @@ function NavigationBar() {
         <Container fluid className="d-flex align-items-center">
           <Row className="w-100 d-flex align-items-center justify-content-between">
             <Col xs="auto" className="d-flex align-items-center">
-              <NavLink className="py-1 px-4" to="/donations">
+              <NavLink className="py-1 px-4" onClick={() => {window.location.href = '/donations'}}>
                 <img src="/logo.jpg" alt="logo" width={100} height={60} />
               </NavLink>
             </Col>
