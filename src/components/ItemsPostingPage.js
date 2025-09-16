@@ -197,7 +197,7 @@ function ItemsPostingPage() {
                 </Form.Label>
                 <Form.Control
                   type="text"
-                  placeholder="A white sofa, Atomic habits..."
+                  placeholder="Enter a title for your item"
                   className="bg-light px-3 py-2"
                   onChange={(e) => handleInput("title", e.target.value)}
                 />
@@ -206,7 +206,7 @@ function ItemsPostingPage() {
               {/* Description */}
               <div className="form-container mb-4">
                 <Form.Label className="fw-semibold">
-                  Description of your ad
+                  Description of your item
                 </Form.Label>
                 <Form.Control
                   as="textarea"

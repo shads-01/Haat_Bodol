@@ -162,37 +162,37 @@ function HomePage() {
             strengthen the bonds of community. Through small acts of kindness,
             we believe we can build a culture of generosity that makes a lasting
             difference.
-            <Row className="d-flex justify-content-center g-0 mt-3">
-              {aboutcards.map((acard, idx) => {
-                const Logo = acard.logo;
-                return (
-                  <Col xs={12} md={6} lg={3} className="d-flex">
-                    <Card className="px-4 my-3 h-100 d-flex align-items-center text-center">
-                      <div
-                        className="d-flex align-items-center justify-content-center mb-3 border border-dark rounded-circle"
-                        style={{ width: "70px", height: "70px" }}
-                      >
-                        <Logo strokeWidth={2} size={32} className="logo" />
-                      </div>
-
-                      <Card.Body className="p-0">
-                        <Card.Title className="fw-bold mb-2">
-                          {acard.title}
-                        </Card.Title>
-                        <Card.Text
-                          className="px-4"
-                          style={{ fontWeight: "300", fontSize: "1.1rem" }}
-                        >
-                          {acard.body}
-                        </Card.Text>
-                      </Card.Body>
-                    </Card>
-                    {idx !== aboutcards.length - 1 && <div className="vline" />}
-                  </Col>
-                );
-              })}
-            </Row>
           </p>
+          <Row className="d-flex justify-content-center g-0 mt-3">
+            {aboutcards.map((acard, idx) => {
+              const Logo = acard.logo;
+              return (
+                <Col xs={12} md={6} lg={3} key={idx} className="d-flex">
+                  <Card className="px-4 my-3 h-100 d-flex align-items-center text-center">
+                    <div
+                      className="d-flex align-items-center justify-content-center mb-3 border border-dark rounded-circle"
+                      style={{ width: "70px", height: "70px" }}
+                    >
+                      <Logo strokeWidth={2} size={32} className="logo" />
+                    </div>
+
+                    <Card.Body className="p-0">
+                      <Card.Title className="fw-bold mb-2">
+                        {acard.title}
+                      </Card.Title>
+                      <Card.Text
+                        className="px-4"
+                        style={{ fontWeight: "300", fontSize: "1.1rem" }}
+                      >
+                        {acard.body}
+                      </Card.Text>
+                    </Card.Body>
+                  </Card>
+                  {idx !== aboutcards.length - 1 && <div className="vline" />}
+                </Col>
+              );
+            })}
+          </Row>
         </Container>
 
         {/* Simple Steps Section */}

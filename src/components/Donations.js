@@ -277,7 +277,7 @@ function Donations() {
     return (
       <Box sx={{ backgroundColor: "#f3eee6", minHeight: "100vh" }}>
         <Container
-          maxWidth="lg"
+
           sx={{
             py: 4,
             display: "flex",
@@ -501,7 +501,7 @@ function Donations() {
         </Row>
 
         {/* Results summary and items per page selector */}
-        <Row className="mx-1 mt-3 d-flex align-items-center justify-content-between">
+        <Row className="mx-1 me-2 mt-3 mb-0 d-flex align-items-center justify-content-between">
           <Col xs="auto">
             <Typography
               variant="body2"
@@ -516,7 +516,7 @@ function Donations() {
             </Typography>
           </Col>
           <Col xs="auto">
-            <Box sx={{ minWidth: 120 }}>
+            <Box sx={{ minWidth: 60 }}>
 
               <FormControl
                 size="small"
@@ -561,7 +561,7 @@ function Donations() {
               lg={3}
               xl={3}
               xxl={3}
-              className="d-flex justify-content-center mb-3 mt-2"
+              className="d-flex justify-content-center mb-3 mt-3"
             >
               <Link
                 key={item._id}
