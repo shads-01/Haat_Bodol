@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { React, useState, useEffect } from "react";
 import axios from "axios";
-
+import Footer from "./Footer";
 import "../css/Donations.css";
 import {
   Container,
@@ -25,7 +25,16 @@ import {
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useLocation } from "react-router-dom";
-import { Box, CircularProgress } from "@mui/material";
+import {
+  Box,
+  CircularProgress,
+  Pagination,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Typography,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
 function Donations() {
@@ -34,6 +43,11 @@ function Donations() {
   const [items, setItems] = useState([]);
   const [filteredItems, setFilteredItems] = useState([]);
   const [isFetching, setIsFetching] = useState(true);
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(16);
+  const [paginatedItems, setPaginatedItems] = useState([]);
 
   const handleClose = () => setShow(false);
   const toggleShow = () => setShow((s) => !s);
@@ -71,6 +85,32 @@ function Donations() {
   });
 
   const location = useLocation();
+
+  // Handle pagination
+  const handlePageChange = (event, page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleItemsPerPageChange = (event) => {
+    setItemsPerPage(event.target.value);
+    setCurrentPage(1); // Reset to first page when changing items per page
+  };
+
+  // Calculate pagination
+  useEffect(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    setPaginatedItems(filteredItems.slice(startIndex, endIndex));
+  }, [filteredItems, currentPage, itemsPerPage]);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [appliedFilters, sortByNewest]);
+
+  // Calculate total pages
+  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
 
   // Handle filter changes
   const handleStatusChange = (statusType, checked) => {
@@ -307,16 +347,15 @@ function Donations() {
                 size="sm"
                 onClick={() => setSortByNewest(!sortByNewest)}
               >
-                {sortByNewest ? (
-                  <>
-                    <ClockArrowUp size={16} className="me-1" />
-                    Sort: Newest First
-                  </>
+                {!sortByNewest ? (
+                  <ClockArrowUp size={16} className="me-1" />
                 ) : (
-                  <>
-                    <ClockArrowDown size={16} className="me-1" />
-                    Sort: Oldest First
-                  </>
+                  <ClockArrowDown size={16} className="me-1" />
+                )}
+                {!sortByNewest ? (
+                  <span className="d-none d-sm-inline"> Sort By: Newest</span>
+                ) : (
+                  <span className="d-none d-sm-inline"> Sort By: Oldest</span>
                 )}
               </Button>
             </div>
@@ -461,9 +500,59 @@ function Donations() {
           </Col>
         </Row>
 
+        {/* Results summary and items per page selector */}
+        <Row className="mx-1 mt-3 d-flex align-items-center justify-content-between">
+          <Col xs="auto">
+            <Typography
+              variant="body2"
+              sx={{ color: "#666", fontSize: "0.9rem" }}
+            >
+              Showing{" "}
+              {paginatedItems.length > 0
+                ? (currentPage - 1) * itemsPerPage + 1
+                : 0}
+              -{Math.min(currentPage * itemsPerPage, filteredItems.length)} of{" "}
+              {filteredItems.length} items
+            </Typography>
+          </Col>
+          <Col xs="auto">
+            <Box sx={{ minWidth: 120 }}>
+
+              <FormControl
+                size="small"
+                sx={{ backgroundColor: "white", borderRadius: 1 }}
+              >
+                <InputLabel
+                  id="items-per-page-label"
+                  sx={{ fontSize: "0.875rem" }}
+                >
+                  Items Per Page
+                </InputLabel>
+                <Select
+                  labelId="items-per-page-label"
+                  value={itemsPerPage}
+                  label="Per Page"
+                  onChange={handleItemsPerPageChange}
+                  sx={{
+                    fontSize: "0.875rem",
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#dee2e6",
+                    },
+                  }}
+                >
+                  <MenuItem value={8}>8</MenuItem>
+                  <MenuItem value={16}>16</MenuItem>
+                  <MenuItem value={32}>32</MenuItem>
+                  <MenuItem value={50}>50</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+          </Col>
+        </Row>
+
         {/* Responsive card grid */}
-        <Row className="g-2 g-md-4 my-2">
-          {filteredItems.map((item, index) => (
+        <Row className="g-2 g-md-4 my-1">
+          {paginatedItems.map((item, index) => (
             <Col
               key={index}
               xs={12}
@@ -472,7 +561,7 @@ function Donations() {
               lg={3}
               xl={3}
               xxl={3}
-              className="d-flex justify-content-center mb-3"
+              className="d-flex justify-content-center mb-3 mt-2"
             >
               <Link
                 key={item._id}
@@ -556,9 +645,47 @@ function Donations() {
             </div>
           )}
         </Row>
+
+        {/* Pagination */}
+        {filteredItems.length > 0 && (
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              py: 2,
+            }}
+          >
+            <Pagination
+              count={totalPages}
+              page={currentPage}
+              onChange={handlePageChange}
+              color="primary"
+              size="large"
+              showFirstButton
+              showLastButton
+              sx={{
+                "& .MuiPaginationItem-root": {
+                  fontSize: "1rem",
+                  fontWeight: 500,
+                  "&.Mui-selected": {
+                    backgroundColor: "#333",
+                    color: "white",
+                    "&:hover": {
+                      backgroundColor: "#555",
+                    },
+                  },
+                  "&:hover": {
+                    backgroundColor: "rgba(0, 0, 0, 0.04)",
+                  },
+                },
+              }}
+            />
+          </Box>
+        )}
       </Container>
+      <Footer />
     </div>
   );
 }
-
 export default Donations;
