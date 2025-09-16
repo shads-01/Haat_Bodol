@@ -11,7 +11,6 @@ import { Toaster } from "react-hot-toast";
 import NavigationBar from "./components/NavigationBar";
 import ChatPage from './components/ChatPage';
 import { NotificationProvider } from "./context/NotificationContext";
-import { socketService } from "./utils/socket"; // Import socket service
 
 // Protected Route Component
 const ProtectedRoute = ({ children, message }) => {
@@ -50,36 +49,11 @@ const ConditionalNavbar = () => {
   return <NavigationBar />;
 };
 
-// Socket Initialization Component
-const SocketInitializer = () => {
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      const socket = socketService.connect(token);
-      
-      // Listen for notifications
-      socket.on('new-notification', (notification) => {
-        console.log('New notification received:', notification);
-        toast.success(notification.message || 'New notification!');
-      });
-
-      // Cleanup on unmount
-      return () => {
-        socket.off('new-notification');
-        socketService.disconnect();
-      };
-    }
-  }, []);
-
-  return null;
-};
-
 function App() {
   return (
     <>
       <BrowserRouter>
         <NotificationProvider>
-          <SocketInitializer />
           <ConditionalNavbar />
           <Routes>
             {/* Public routes */}

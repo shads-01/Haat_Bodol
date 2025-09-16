@@ -150,5 +150,32 @@ router.post('/item-request', auth, async (req, res) => {
     });
   }
 });
+// Delete single notification
+router.delete('/:id', auth, async (req, res) => {
+  try {
+    const notification = await Notification.findOneAndDelete({
+      _id: req.params.id,
+      recipient: req.user.id // User can only delete their own notifications
+    });
+
+    if (!notification) {
+      return res.status(404).json({ error: 'Notification not found' });
+    }
+
+    res.json({ success: true, message: 'Notification deleted' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Delete all notifications for user
+router.delete('/', auth, async (req, res) => {
+  try {
+    await Notification.deleteMany({ recipient: req.user.id });
+    res.json({ success: true, message: 'All notifications deleted' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 export default router;

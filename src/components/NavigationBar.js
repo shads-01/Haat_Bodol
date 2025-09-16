@@ -15,8 +15,17 @@ import {
   NavDropdown,
 } from "react-bootstrap";
 import { NavLink } from "react-router-dom";
-import { MessageSquareText, Bell, Search, Menu, X, User, LogOut } from "lucide-react";
+import {
+  MessageSquareText,
+  Bell,
+  Search,
+  Menu,
+  X,
+  User,
+  LogOut,
+} from "lucide-react";
 import toast from "react-hot-toast";
+import NotificationDropdown from "./NotificationDropdown";
 
 function NavigationBar() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -140,7 +149,7 @@ function NavigationBar() {
 
   // Fixed: Use navigate directly instead of onClick handler
   const handleChatNavigation = () => {
-    navigate('/chat');
+    navigate("/chat");
   };
 
   return (
@@ -240,25 +249,26 @@ function NavigationBar() {
                   >
                     Post an Item
                   </Button>
-                  
+
                   {/* FIXED: Use Button with onClick instead of NavLink */}
                   <Button
                     variant="link"
                     className="nav-link p-0"
                     onClick={handleChatNavigation}
-                    style={{ color: 'inherit' }}
+                    style={{ color: "inherit" }}
                   >
                     <MessageSquareText strokeWidth={2.5} />
                   </Button>
-                  
+
                   <Button
                     variant="link"
                     className="nav-link p-0"
-                    style={{ color: 'inherit' }}
+                    style={{ color: "inherit" }}
                   >
-                    <Bell strokeWidth={2.5} />
+                    <NotificationDropdown />
+                    {/* <Bell strokeWidth={2.5} /> */}
                   </Button>
-                  
+
                   <div className="profile-dropdown">
                     <NavDropdown
                       title={
@@ -402,13 +412,10 @@ function NavigationBar() {
                   <span>Messages</span>
                 </Button>
                 <Button
-                  as={NavLink}
-                  to="/profile"
                   variant="outline-dark"
                   className="d-flex align-items-center gap-3 p-2 border border-black w-100"
-                  onClick={handleClose}
                 >
-                  <Bell strokeWidth={2} size={20} />
+                  <NotificationDropdown />
                   <span>Notifications</span>
                 </Button>
               </div>
