@@ -16,7 +16,13 @@ import {
   Offcanvas,
   Form,
 } from "react-bootstrap";
-import { Clock, MapPin, SlidersHorizontal, ArrowUpDown } from "lucide-react";
+import {
+  Clock,
+  MapPin,
+  SlidersHorizontal,
+  ClockArrowUp,
+  ClockArrowDown,
+} from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useLocation } from "react-router-dom";
 import { Box, CircularProgress } from "@mui/material";
@@ -38,63 +44,63 @@ function Donations() {
   const [appliedFilters, setAppliedFilters] = useState({
     status: {
       reserved: false,
-      notReserved: false
+      notReserved: false,
     },
-    timeListed: '',
+    timeListed: "",
     condition: {
       good: false,
       likeNew: false,
       used: false,
-      broken: false
-    }
+      broken: false,
+    },
   });
 
   // Temporary filters - what user is selecting
   const [tempFilters, setTempFilters] = useState({
     status: {
       reserved: false,
-      notReserved: false
+      notReserved: false,
     },
-    timeListed: '',
+    timeListed: "",
     condition: {
       good: false,
       likeNew: false,
       used: false,
-      broken: false
-    }
+      broken: false,
+    },
   });
 
   const location = useLocation();
 
   // Handle filter changes
   const handleStatusChange = (statusType, checked) => {
-    setTempFilters(prev => ({
+    setTempFilters((prev) => ({
       ...prev,
       status: {
         ...prev.status,
-        [statusType]: checked
-      }
+        [statusType]: checked,
+      },
     }));
   };
   const handleTimeListedChange = (timeRange) => {
-    setTempFilters(prev => ({
+    setTempFilters((prev) => ({
       ...prev,
-      timeListed: timeRange
+      timeListed: timeRange,
     }));
   };
   const handleConditionChange = (conditionType, checked) => {
-    setTempFilters(prev => ({
+    setTempFilters((prev) => ({
       ...prev,
       condition: {
         ...prev.condition,
-        [conditionType]: checked
-      }
+        [conditionType]: checked,
+      },
     }));
   };
 
   // Apply filters - move temp filters to applied filters
   const applyFilters = () => {
-    setAppliedFilters({...tempFilters});
+    setAppliedFilters({ ...tempFilters });
     handleClose();
   };
 
@@ -103,15 +109,15 @@ function Donations() {
     const resetFilters = {
       status: {
         reserved: false,
-        notReserved: false
+        notReserved: false,
       },
-      timeListed: '',
+      timeListed: "",
       condition: {
         good: false,
         likeNew: false,
         used: false,
-        broken: false
-      }
+        broken: false,
+      },
     };
     setTempFilters(resetFilters);
     setAppliedFilters(resetFilters);
@@ -124,10 +130,10 @@ function Donations() {
     // Status filter
     const { reserved, notReserved } = appliedFilters.status;
     if (reserved || notReserved) {
-      filtered = filtered.filter(item => {
+      filtered = filtered.filter((item) => {
         if (reserved && notReserved) return true;
-        if (reserved) return item.status === 'reserved';
-        if (notReserved) return item.status === 'available';
+        if (reserved) return item.status === "reserved";
+        if (notReserved) return item.status === "available";
         return true;
       });
     }
@@ -137,17 +143,17 @@ function Donations() {
       const now = new Date();
       const itemDate = (item) => new Date(item.createdAt);
 
-      filtered = filtered.filter(item => {
+      filtered = filtered.filter((item) => {
         const createdAt = itemDate(item);
         const diffInHours = (now - createdAt) / (1000 * 60 * 60);
         const diffInDays = diffInHours / 24;
 
         switch (appliedFilters.timeListed) {
-          case '24hours':
+          case "24hours":
             return diffInHours <= 24;
-          case '7days':
+          case "7days":
             return diffInDays <= 7;
-          case '30days':
+          case "30days":
             return diffInDays <= 30;
           default:
             return true;
@@ -161,18 +167,18 @@ function Donations() {
       .map(([condition, _]) => condition);
 
     if (activeConditions.length > 0) {
-      filtered = filtered.filter(item => {
+      filtered = filtered.filter((item) => {
         const itemCondition = item.condition?.toLowerCase();
-        return activeConditions.some(condition => {
+        return activeConditions.some((condition) => {
           switch (condition) {
-            case 'good':
-              return itemCondition === 'good';
-            case 'likeNew':
-              return itemCondition === 'like-new';
-            case 'used':
-              return itemCondition === 'used';
-            case 'broken':
-              return itemCondition === 'broken';
+            case "good":
+              return itemCondition === "good";
+            case "likeNew":
+              return itemCondition === "like-new";
+            case "used":
+              return itemCondition === "used";
+            case "broken":
+              return itemCondition === "broken";
             default:
               return false;
           }
@@ -184,7 +190,7 @@ function Donations() {
   // Sort items
   const sortItems = (itemsToSort) => {
     if (!sortByNewest) return itemsToSort;
-    
+
     return [...itemsToSort].sort((a, b) => {
       return new Date(b.createdAt) - new Date(a.createdAt);
     });
@@ -294,13 +300,24 @@ function Donations() {
           <Col xs="auto" className="d-flex justify-content-center">
             <div className="me-2 me-md-3">
               <Button
-                variant={sortByNewest ? "dark" : "outline-dark"}
-                className={`sort-btn d-flex align-items-center ${sortByNewest ? "active" : ""}`}
+                variant={"outline-dark"}
+                className={`sort-btn d-flex align-items-center ${
+                  sortByNewest ? "active" : ""
+                }`}
                 size="sm"
                 onClick={() => setSortByNewest(!sortByNewest)}
               >
-                <ArrowUpDown size={16} className="me-1" />
-                <span className="d-none d-sm-inline">Sort by</span>
+                {sortByNewest ? (
+                  <>
+                    <ClockArrowUp size={16} className="me-1" />
+                    Sort: Newest First
+                  </>
+                ) : (
+                  <>
+                    <ClockArrowDown size={16} className="me-1" />
+                    Sort: Oldest First
+                  </>
+                )}
               </Button>
             </div>
             <div>
@@ -334,17 +351,21 @@ function Donations() {
                       label="Reserved"
                       id="statusReserved"
                       checked={tempFilters.status.reserved}
-                      onChange={(e) => handleStatusChange('reserved', e.target.checked)}
+                      onChange={(e) =>
+                        handleStatusChange("reserved", e.target.checked)
+                      }
                     />
                     <Form.Check
                       type="checkbox"
                       label="Available"
                       id="statusNotReserved"
                       checked={tempFilters.status.notReserved}
-                      onChange={(e) => handleStatusChange('notReserved', e.target.checked)}
+                      onChange={(e) =>
+                        handleStatusChange("notReserved", e.target.checked)
+                      }
                     />
                   </div>
-                  
+
                   {/* Time Listed Filter */}
                   <div className="mb-4">
                     <h5>Time Listed</h5>
@@ -353,32 +374,32 @@ function Donations() {
                       name="timeListed"
                       label="Last 24 hours"
                       id="hr24"
-                      checked={tempFilters.timeListed === '24hours'}
-                      onChange={() => handleTimeListedChange('24hours')}
+                      checked={tempFilters.timeListed === "24hours"}
+                      onChange={() => handleTimeListedChange("24hours")}
                     />
                     <Form.Check
                       type="radio"
                       name="timeListed"
                       label="Last 7 days"
                       id="day7"
-                      checked={tempFilters.timeListed === '7days'}
-                      onChange={() => handleTimeListedChange('7days')}
+                      checked={tempFilters.timeListed === "7days"}
+                      onChange={() => handleTimeListedChange("7days")}
                     />
                     <Form.Check
                       type="radio"
                       name="timeListed"
                       label="Last month"
                       id="monthLast"
-                      checked={tempFilters.timeListed === '30days'}
-                      onChange={() => handleTimeListedChange('30days')}
+                      checked={tempFilters.timeListed === "30days"}
+                      onChange={() => handleTimeListedChange("30days")}
                     />
                     <Form.Check
                       type="radio"
                       name="timeListed"
                       label="All time"
                       id="allTime"
-                      checked={tempFilters.timeListed === ''}
-                      onChange={() => handleTimeListedChange('')}
+                      checked={tempFilters.timeListed === ""}
+                      onChange={() => handleTimeListedChange("")}
                     />
                   </div>
                   {/* Condition Filter */}
@@ -389,44 +410,48 @@ function Donations() {
                       label="Good"
                       id="conditionGood"
                       checked={tempFilters.condition.good}
-                      onChange={(e) => handleConditionChange('good', e.target.checked)}
+                      onChange={(e) =>
+                        handleConditionChange("good", e.target.checked)
+                      }
                     />
                     <Form.Check
                       type="checkbox"
                       label="Like New"
                       id="conditionLikeNew"
                       checked={tempFilters.condition.likeNew}
-                      onChange={(e) => handleConditionChange('likeNew', e.target.checked)}
+                      onChange={(e) =>
+                        handleConditionChange("likeNew", e.target.checked)
+                      }
                     />
                     <Form.Check
                       type="checkbox"
                       label="Used"
                       id="conditionUsed"
                       checked={tempFilters.condition.used}
-                      onChange={(e) => handleConditionChange('used', e.target.checked)}
+                      onChange={(e) =>
+                        handleConditionChange("used", e.target.checked)
+                      }
                     />
                     <Form.Check
                       type="checkbox"
                       label="Broken"
                       id="conditionBroken"
                       checked={tempFilters.condition.broken}
-                      onChange={(e) => handleConditionChange('broken', e.target.checked)}
+                      onChange={(e) =>
+                        handleConditionChange("broken", e.target.checked)
+                      }
                     />
                   </div>
                   {/* Apply / Clear Buttons */}
                   <div className="mt-auto d-flex justify-content-between ac-btn">
-                    <Button 
-                      variant="secondary" 
+                    <Button
+                      variant="secondary"
                       size="sm"
                       onClick={clearAllFilters}
                     >
                       Clear All
                     </Button>
-                    <Button 
-                      variant="dark" 
-                      size="sm"
-                      onClick={applyFilters}
-                    >
+                    <Button variant="dark" size="sm" onClick={applyFilters}>
                       Apply Filters
                     </Button>
                   </div>

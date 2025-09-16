@@ -78,11 +78,14 @@ function ItemsPostingPage() {
       const token = localStorage.getItem("token");
 
       // Fetch user profile data
-      const response = await axios.get("http://localhost:5000/api/auth/profile", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.get(
+        "http://localhost:5000/api/auth/profile",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       const userData = response.data;
 
@@ -328,7 +331,18 @@ function ItemsPostingPage() {
                 variant="dark w-100 my-4 p-2 fw-semibold"
                 disabled={loading}
               >
-                {loading ? "Posting Item..." : "Post Item"}
+                {loading ? (
+                  <>
+                    <span
+                      className="spinner-border spinner-border-sm me-2"
+                      role="status"
+                      aria-hidden="true"
+                    />
+                    Posting Item...{" "}
+                  </>
+                ) : (
+                  "Post Item"
+                )}
               </Button>
             </Form>
           </Col>
