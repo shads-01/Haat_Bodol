@@ -52,14 +52,14 @@ app.use("/api/chat", chatRoutes);
 io.use(async (socket, next) => {
   try {
     const token = socket.handshake.auth.token;
-    
+
     if (!token) {
       return next(new Error('Authentication error: No token provided'));
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.userId).select('name email profilePic');
-    
+
     if (!user) {
       return next(new Error('Authentication error: User not found'));
     }
@@ -85,6 +85,11 @@ io.on('connection', (socket) => {
       const { receiverId, content } = data;
       const senderId = socket.userId;
 
+      // Validate that we have both sender and receiver
+      if (!receiverId) {
+        throw new Error('Receiver ID is required');
+      }
+
       // Save message to database
       const message = new Message({
         sender: senderId,
@@ -95,20 +100,32 @@ io.on('connection', (socket) => {
 
       await message.save();
 
-      // Update or create conversation
-      let conversation = await Conversation.findOne({
-        participants: { $all: [senderId, receiverId] }
-      });
-
-      if (!conversation) {
-        conversation = new Conversation({
-          participants: [senderId, receiverId]
-        });
+      // Defensive: ensure exactly two distinct participants for 1-to-1 chat
+      if (!senderId || !receiverId) {
+        throw new Error('Both sender and receiver IDs are required');
       }
 
-      conversation.lastMessage = message._id;
-      conversation.updatedAt = new Date();
-      await conversation.save();
+      if (senderId === receiverId) {
+        throw new Error('Cannot send message to self');
+      }
+
+      // Sort and dedupe participants to ensure consistent ordering for unique index
+      const participants = Array.from(new Set([senderId, receiverId])).sort();
+
+      if (participants.length !== 2) {
+        throw new Error('Conversation must have exactly 2 unique participants');
+      }
+
+      // Atomically find and update (or insert) the 1-to-1 conversation to avoid duplicate inserts
+      const filter = { 'participants.0': participants[0], 'participants.1': participants[1] };
+      const update = {
+        $set: { lastMessage: message._id, updatedAt: new Date() },
+        $setOnInsert: { participants }
+      };
+
+      const conversationOptions = { upsert: true, new: true, setDefaultsOnInsert: true };
+
+      let conversation = await Conversation.findOneAndUpdate(filter, update, conversationOptions).exec();
 
       // Populate message with sender info
       const populatedMessage = await Message.findById(message._id)
@@ -117,7 +134,7 @@ io.on('connection', (socket) => {
 
       // Emit to sender
       socket.emit('receive-message', populatedMessage);
-      
+
       // Emit to receiver if they're online
       socket.to(receiverId).emit('receive-message', populatedMessage);
 
@@ -125,7 +142,7 @@ io.on('connection', (socket) => {
 
     } catch (error) {
       console.error('Error sending message:', error);
-      socket.emit('message-error', { error: 'Failed to send message' });
+      socket.emit('message-error', { error: 'Failed to send message: ' + error.message });
     }
   });
 
@@ -161,6 +178,31 @@ mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => {
     console.log("MongoDB connected");
+
+    // Ensure conversation indexes are correct. If an old single-key index on `participants` exists
+    // it can cause duplicate-key errors when inserting arrays. Attempt to drop it and recreate
+    // the intended compound unique index.
+    (async () => {
+      try {
+        const collection = mongoose.connection.collection('conversations');
+
+        // List existing indexes
+        const indexes = await collection.indexes();
+        const hasSingleKeyParticipantsIndex = indexes.some(idx => idx.key && idx.key.participants === 1);
+
+        if (hasSingleKeyParticipantsIndex) {
+          console.log('Dropping stale single-key index on participants');
+          await collection.dropIndex('participants_1');
+        }
+
+        // Ensure the compound unique index exists (this mirrors the Mongoose schema index)
+        await collection.createIndex({ 'participants.0': 1, 'participants.1': 1 }, { unique: true });
+        console.log('Conversation indexes ensured');
+      } catch (idxErr) {
+        console.error('Error ensuring conversation indexes:', idxErr.message || idxErr);
+      }
+    })();
+
     httpServer.listen(PORT, () => {
       console.log(`Server running on http://localhost:${PORT}`);
     });
@@ -173,7 +215,7 @@ mongoose
 // Error handling middleware
 app.use((error, req, res, next) => {
   console.error('Unhandled error:', error);
-  res.status(500).json({ 
+  res.status(500).json({
     message: 'Something went wrong',
     error: process.env.NODE_ENV === 'development' ? error.message : undefined
   });
