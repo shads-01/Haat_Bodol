@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom"; // Add useNavigate
 import { Container, Row, Col, Card, Badge, Carousel } from "react-bootstrap";
 import { Clock, MapPin } from "lucide-react";
 import axios from "axios";
@@ -9,6 +9,7 @@ import { formatDistanceToNow } from "date-fns";
 
 function ProductDetails() {
   const { id } = useParams();
+  const navigate = useNavigate(); // Add this line
   const [item, setItem] = useState(null);
   const [donor, setDonor] = useState(null);
 
@@ -31,6 +32,13 @@ function ProductDetails() {
       .split(" ")
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(" ");
+  };
+
+  const handleMessageDonor = () => {
+    if (!donor) return;
+    
+    // Navigate to chat page with donor ID
+    navigate('/chat', { state: { startChatWith: donor._id } });
   };
 
   if (!item) return <p className="text-center mt-5">Item not found</p>;
@@ -160,8 +168,10 @@ function ProductDetails() {
                     <div className="d-grid gap-2 mt-4">
                       <button className="btn btn-dark">Request Item</button>
                     </div>
-                    <div className="d-grid gap-2 mt-3">
-                      <button className="btn btn-dark">Message Donor</button>
+                    <div className="d-grid gap-2 mt-4">
+                      <button className="btn btn-dark" onClick={handleMessageDonor}>
+                        Message Donor
+                      </button>
                     </div>
                   </>
                 ) : (

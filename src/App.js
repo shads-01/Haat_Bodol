@@ -9,6 +9,8 @@ import ItemsPostingPage from "./components/ItemsPostingPage";
 import ItemDetails from "./components/ItemDetails";
 import { Toaster } from "react-hot-toast";
 import NavigationBar from "./components/NavigationBar";
+import ChatPage from './components/ChatPage';
+
 
 // Protected Route Component
 const ProtectedRoute = ({ children, message }) => {
@@ -59,6 +61,7 @@ function App() {
           <Route path="/login-register" element={<LoginRegister />} />
           <Route path="/donations" element={<Donations />} />
           <Route path="/item/:id" element={<ItemDetails />} />
+          <Route path="/chat" element={<ChatPage />} />
           
           {/* Protected routes */}
           <Route 

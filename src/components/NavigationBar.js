@@ -1,4 +1,4 @@
-import { React, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../css/Navbar.css";
@@ -12,8 +12,6 @@ import {
   Row,
   Col,
   Offcanvas,
-  Dropdown,
-  DropdownButton,
   NavDropdown,
 } from "react-bootstrap";
 import { NavLink } from "react-router-dom";
@@ -128,7 +126,7 @@ function NavigationBar() {
       localStorage.removeItem("token");
       localStorage.removeItem("refreshToken");
       localStorage.removeItem("user");
-      
+
       // Redirect to login
       navigate("/login-register");
       toast.success("Signed out successfully");
@@ -140,13 +138,18 @@ function NavigationBar() {
     }
   };
 
+  // Fixed: Use navigate directly instead of onClick handler
+  const handleChatNavigation = () => {
+    navigate('/chat');
+  };
+
   return (
     <>
       <Navbar data-bs-theme="light" sticky="top" className="navbar shadow-md">
         <Container fluid className="d-flex align-items-center">
           <Row className="w-100 d-flex align-items-center justify-content-between">
             <Col xs="auto" className="d-flex align-items-center">
-              <NavLink className="py-1 px-4" onClick={() => window.location.href  = '/donations'}>
+              <NavLink className="py-1 px-4" to="/donations">
                 <img src="/logo.jpg" alt="logo" width={100} height={60} />
               </NavLink>
             </Col>
@@ -237,12 +240,25 @@ function NavigationBar() {
                   >
                     Post an Item
                   </Button>
-                  <NavLink to="#" className="nav-link">
+                  
+                  {/* FIXED: Use Button with onClick instead of NavLink */}
+                  <Button
+                    variant="link"
+                    className="nav-link p-0"
+                    onClick={handleChatNavigation}
+                    style={{ color: 'inherit' }}
+                  >
                     <MessageSquareText strokeWidth={2.5} />
-                  </NavLink>
-                  <NavLink to="#" className="nav-link">
+                  </Button>
+                  
+                  <Button
+                    variant="link"
+                    className="nav-link p-0"
+                    style={{ color: 'inherit' }}
+                  >
                     <Bell strokeWidth={2.5} />
-                  </NavLink>
+                  </Button>
+                  
                   <div className="profile-dropdown">
                     <NavDropdown
                       title={
@@ -264,8 +280,7 @@ function NavigationBar() {
                         to="/profile"
                         className="d-flex align-items-center"
                       >
-                        <i className="fas fa-user me-2"></i>
-                        <User size={20} className="me-2"/>
+                        <User size={20} className="me-2" />
                         Profile
                       </NavDropdown.Item>
                       <NavDropdown.Divider />
@@ -274,8 +289,7 @@ function NavigationBar() {
                         className="d-flex align-items-center text-danger"
                         style={{ cursor: "pointer" }}
                       >
-                        <i className="fas fa-sign-out-alt me-2"></i>
-                        <LogOut size={20} className="me-2"/>
+                        <LogOut size={20} className="me-2" />
                         Sign Out
                       </NavDropdown.Item>
                     </NavDropdown>
@@ -319,8 +333,7 @@ function NavigationBar() {
                       to="/profile"
                       className="d-flex align-items-center"
                     >
-                      <i className="fas fa-user me-2"></i>
-                      <User size={20} className="me-2"/>
+                      <User size={20} className="me-2" />
                       Profile
                     </NavDropdown.Item>
                     <NavDropdown.Divider />
@@ -329,8 +342,7 @@ function NavigationBar() {
                       className="d-flex align-items-center text-danger"
                       style={{ cursor: "pointer" }}
                     >
-                      <i className="fas fa-sign-out-alt me-2"></i>
-                      <LogOut size={20} className="me-2"/>
+                      <LogOut size={20} className="me-2" />
                       Sign Out
                     </NavDropdown.Item>
                   </NavDropdown>
@@ -377,12 +389,14 @@ function NavigationBar() {
                 </Button>
               </div>
               <div className="d-flex flex-column gap-3">
+                {/* FIXED: Use Button with onClick for mobile chat navigation */}
                 <Button
-                  as={NavLink}
-                  to="/profile"
                   variant="outline-dark"
                   className="d-flex align-items-center gap-3 p-2 border border-black w-100"
-                  onClick={handleClose}
+                  onClick={() => {
+                    handleChatNavigation();
+                    handleClose();
+                  }}
                 >
                   <MessageSquareText strokeWidth={2} size={20} />
                   <span>Messages</span>
@@ -470,7 +484,10 @@ function NavigationBar() {
                   <div
                     key={item._id}
                     className="search-result-item py-1 px-2"
-                    onClick={() => navigate(`/item/${item._id}`)}
+                    onClick={() => {
+                      navigate(`/item/${item._id}`);
+                      setSearchFocused(false);
+                    }}
                     style={{ cursor: "pointer" }}
                   >
                     {item.title}
