@@ -178,4 +178,70 @@ router.delete('/', auth, async (req, res) => {
   }
 });
 
+router.post('/:id/action', auth, async (req, res) => {
+  try {
+    const { action } = req.body; // 'approve' or 'reject'
+    const notificationId = req.params.id;
+
+    // Find the notification
+    const notification = await Notification.findById(notificationId)
+      .populate('sender', 'name email')
+      .populate('recipient', 'name email');
+
+    if (!notification) {
+      return res.status(404).json({ error: 'Notification not found' });
+    }
+
+    // Check if user owns this notification
+    if (notification.recipient._id.toString() !== req.user.id) {
+      return res.status(403).json({ error: 'Not authorized' });
+    }
+
+    // Update notification status
+    notification.status = action;
+    notification.read = true;
+    await notification.save();
+
+    // If approved, update item status to "reserved"
+    if (action === 'approved' && notification.relatedEntity.type === 'Item') {
+      const Item = mongoose.model('Item'); // Adjust based on your Item model name
+      await Item.findByIdAndUpdate(
+        notification.relatedEntity.id,
+        { status: 'reserved' }
+      );
+    }
+
+    // Create response notification for the requester
+    const responseNotification = new Notification({
+      recipient: notification.sender._id,
+      sender: req.user.id,
+      type: 'request_response',
+      title: `Item Request ${action === 'approved' ? 'Approved' : 'Rejected'}`,
+      message: `Your request for "${notification.message.split(':')[1]?.trim() || 'the item'}" has been ${action === 'approved' ? 'approved' : 'rejected'} by ${req.user.name}`,
+      relatedEntity: notification.relatedEntity,
+      status: 'completed',
+      read: false
+    });
+
+    await responseNotification.save();
+    await responseNotification.populate('sender', 'name profilePic');
+
+    // Send real-time notification to requester
+    const io = req.app.get('io');
+    if (io) {
+      io.to(notification.sender._id.toString()).emit('new-notification', responseNotification);
+    }
+
+    res.json({
+      success: true,
+      message: `Request ${action}ed successfully`,
+      notification: responseNotification
+    });
+
+  } catch (error) {
+    console.error('Error processing action:', error);
+    res.status(500).json({ error: 'Failed to process action' });
+  }
+});
+
 export default router;

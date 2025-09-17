@@ -15,6 +15,7 @@ const NotificationSchema = new mongoose.Schema({
     required: true, 
     enum: [
       'item_request', 
+      'request_response',
       'donation_request',  
       'exchange_offer',
       'transaction_update',
@@ -46,6 +47,25 @@ const NotificationSchema = new mongoose.Schema({
   createdAt: { 
     type: Date, 
     default: Date.now 
+  },
+  actionRequired: {
+    type: Boolean,
+    default: false
+  },
+  actions: {
+    approve: {
+      type: Boolean,
+      default: false
+    },
+    reject: {
+      type: Boolean,
+      default: false
+    }
+  },
+  status: {
+    type: String,
+    enum: ['completed', 'pending', 'approved', 'rejected'],
+    default: 'pending'
   }
 });
 
