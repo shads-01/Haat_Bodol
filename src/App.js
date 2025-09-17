@@ -17,6 +17,7 @@ import ItemsPostingPage from "./components/ItemsPostingPage";
 import ItemDetails from "./components/ItemDetails";
 import ChatPage from "./components/ChatPage";
 import NavigationBar from "./components/NavigationBar";
+import DonorProfile from "./components/DonorProfile";
 import { NotificationProvider } from "./context/NotificationContext";
 
 // 404 Error Page
@@ -89,11 +90,16 @@ const ConditionalNavbar = () => {
   // Routes where navbar should be hidden
   const hideRoutes = ["/", "/home", "/login-register"];
   const isItemRoute = pathname.startsWith("/item/");
+  const isDonorRoute = pathname.startsWith("/donor/");
 
   // Hide navbar if exact hide route OR 404
   if (hideRoutes.includes(pathname)) return null;
-  if (!["/donations", "/chat", "/post-item", "/profile"].includes(pathname) && !isItemRoute) {
-    return null; 
+  if (
+    !["/donations", "/chat", "/post-item", "/profile"].includes(pathname) &&
+    !isItemRoute &&
+    !isDonorRoute
+  ) {
+    return null;
   }
   return <NavigationBar />;
 };
@@ -127,6 +133,14 @@ function App() {
               element={
                 <ProtectedRoute message="You must be logged in to view your profile">
                   <Profile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/donor/:id"
+              element={
+                <ProtectedRoute message="You must be logged in to view the donor profile">
+                  <DonorProfile />
                 </ProtectedRoute>
               }
             />

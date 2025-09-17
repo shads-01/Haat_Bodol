@@ -13,4 +13,6 @@ router.get('/profile', auth, authController.getProfile);
 router.put('/profile', auth, authController.updateProfile);
 router.post('/profile/picture', auth, upload.single('profilePhoto'), authController.uploadProfilePicture);
 
+router.get('/donor/:id', authController.getProfileByID);
+
 export default router;

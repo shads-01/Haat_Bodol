@@ -77,6 +77,12 @@ function ProductDetails() {
     fetchItem();
   }, [id]);
 
+  const handleDonorClick = () => {
+    if (donor?._id) {
+      navigate(`/donor/${donor._id}`);
+    }
+  };
+
   const capitalizeWords = (str) => {
     if (!str) return "N/A";
     return str
@@ -210,21 +216,33 @@ function ProductDetails() {
                 <h4 className="mb-2">Donated By</h4>
                 {donor ? (
                   <>
-                    <div className="text-center mb-4">
+                    <div
+                      className="text-center mb-4 cursor-pointer transition-all duration-200 hover:bg-gray-50 rounded-lg p-3"
+                      onClick={handleDonorClick}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          handleDonorClick();
+                        }
+                      }}
+                    >
                       <img
                         src={donor.profilePic?.url || "/placeholder.png"}
                         alt="Profile picture"
-                        className="rounded-circle border border-2 border-black"
+                        className="rounded-circle border border-2 border-black hover:scale-105 transition-transform duration-200"
                         width={100}
                         height={100}
                         onError={(e) => {
                           e.target.src = "/placeholder.png";
                         }}
                       />
-
-                      <h5 className="mt-3 mb-1">
+                      <h5 className="mt-3 mb-1 hover:text-blue-600 transition-colors duration-200">
                         {donor.name || "Anonymous Donor"}
                       </h5>
+                      <small className="text-muted">
+                        Click to view profile
+                      </small>
                     </div>
 
                     <div className="border-top pt-3">

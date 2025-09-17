@@ -1,6 +1,7 @@
 import User from "../models/user.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 import { sendVerificationEmail, welcomeEmail } from "../middleware/email.js";
 
 // Temporary storage for unverified users
@@ -409,6 +410,104 @@ const updateProfile = async (req, res) => {
   }
 };
 
+const getProfileByID = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    console.log('Received ID:', id); // Debug log
+
+    // Validate if ID is provided
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: 'User ID is required'
+      });
+    }
+
+    // Validate MongoDB ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid user ID format'
+      });
+    }
+
+    console.log('Looking for user with ID:', id); // Debug log
+
+    const user = await User.findById(id).select('-password -__v');
+    
+    console.log('User found:', user ? 'Yes' : 'No'); // Debug log
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Format join date using the joinDate field from your schema
+    const formatJoinDate = (date) => {
+      try {
+        return new Date(date).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long'
+        });
+      } catch (error) {
+        return 'Unknown';
+      }
+    };
+
+    console.log('Preparing response data...'); // Debug log
+
+    // Prepare response data matching your schema fields
+    const profileData = {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone || null,
+      address: user.address || null,
+      dob: user.dob || null,
+      profilePic: user.profilePic || null, // This matches your schema structure
+      joinDate: formatJoinDate(user.joinDate), // Using joinDate from schema
+      level: user.level || 'Bronze', // Using level from schema
+      donations: user.donations || 0, // Using donations from schema
+      claims: user.claims || 0, // Using claims from schema
+      verified: user.isVerified || false,
+    };
+
+    console.log('Profile data prepared:', profileData); 
+
+    res.status(200).json({
+      success: true,
+      message: 'Profile retrieved successfully',
+      data: profileData
+    });
+
+  } catch (error) {
+    console.error('Error in getProfileByID:', error);
+    console.error('Error stack:', error.stack);
+    if (error.name === 'CastError') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid user ID format',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation error',
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong'
+    });
+  }
+};
+
 export default {
   register,
   login,
@@ -416,5 +515,6 @@ export default {
   updateProfile,
   uploadProfilePicture,
   verifyEmail,
-  resendVerification
+  resendVerification,
+  getProfileByID
 };
