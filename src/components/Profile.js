@@ -300,6 +300,53 @@ const ProfilePage = () => {
     }
   };
 
+  const handleMarkAsDonated = async (itemId) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      setSnackbar({
+        open: true,
+        message: "Not authenticated. Please login again.",
+        severity: "error",
+      });
+      return;
+    }
+
+    // Make API call to update item status to 'donated'
+    const response = await fetch(`http://localhost:5000/api/items/${itemId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ status: 'donated' }),
+    });
+
+    if (response.ok) {
+      // Show success message
+      setSnackbar({
+        open: true,
+        message: "Item marked as donated successfully!",
+        severity: "success",
+      });
+
+      // Refresh the items list using your existing function
+      fetchUserItems();
+    } else {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to mark item as donated");
+    }
+  } catch (error) {
+    console.error("Error marking item as donated:", error);
+    setSnackbar({
+      open: true,
+      message: error.message || "Error marking item as donated",
+      severity: "error",
+    });
+  }
+};
+
   const cardStyle = {
     backgroundColor: "white",
     border: "1px solid",
@@ -693,11 +740,11 @@ const ProfilePage = () => {
                 <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
                   <CircularProgress />
                 </Box>
-              ) : userItems.filter((item) => item.status === "donated").length >
+              ) : userItems.filter((item) => item.status === "donated" || item.status === "reserved").length >
                 0 ? (
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                   {userItems
-                    .filter((item) => item.status === "donated")
+                    .filter((item) => item.status === "donated" || item.status === "reserved")
                     .map((item) => (
                       <Paper
                         key={item._id}
@@ -767,16 +814,31 @@ const ProfilePage = () => {
                           <Typography variant="caption" color="text.secondary">
                             {new Date(item.createdAt).toLocaleDateString()}
                           </Typography>
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            color="info"
-                            onClick={() =>
-                              window.open(`/item/${item._id}`, "_blank")
-                            }
-                          >
-                            View Details
-                          </Button>
+                          <Box sx={{ display: "flex", gap: 1 }}>
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              color="info"
+                              onClick={() =>
+                                window.open(`/item/${item._id}`, "_blank")
+                              }
+                            >
+                              View Details
+                            </Button>
+                            {item.status === "reserved" && (
+                              <Button
+                                size="small"
+                                variant="contained"
+                                color="success"
+                                onClick={() => handleMarkAsDonated(item._id)}
+                                sx={{
+                                  minWidth: "120px",
+                                }}
+                              >
+                                Mark as Donated
+                              </Button>
+                            )}
+                          </Box>
                         </Box>
                       </Paper>
                     ))}
@@ -784,10 +846,10 @@ const ProfilePage = () => {
               ) : (
                 <Box sx={{ textAlign: "center", py: 4 }}>
                   <Typography variant="h6" color="text.secondary" gutterBottom>
-                    No items donated yet
+                    No donated or reserved items yet
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Start donating to help your community!
+                    Items will appear here once they are reserved or donated!
                   </Typography>
                   <Button
                     variant="contained"

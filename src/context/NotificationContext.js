@@ -63,7 +63,6 @@ export const NotificationProvider = ({ children }) => {
           return () => {
             console.log('Cleaning up socket listeners');
             socket.off('new-notification');
-            // Don't disconnect here - let the socket service manage connection
           };
 
         } catch (error) {
@@ -125,7 +124,6 @@ export const NotificationProvider = ({ children }) => {
       setNotifications((prev) =>
         prev.filter((notif) => notif._id !== notificationId)
       );
-      // Also reduce unread count if the deleted notification was unread
       setUnreadCount((prev) => {
         const deletedNotif = notifications.find(
           (n) => n._id === notificationId
@@ -149,6 +147,24 @@ export const NotificationProvider = ({ children }) => {
       throw error;
     }
   };
+  const processNotificationAction = async (notificationId, action) => {
+    try {
+      const response = await notificationAPI.processAction(notificationId, action);
+      
+      setNotifications(prev => 
+        prev.map(notif => 
+          notif._id === notificationId 
+            ? { ...notif, status: action, read: true }
+            : notif
+        )
+      );
+      toast.success(`Request ${action}ed successfully`);
+      return response;
+    } catch (error) {
+      toast.error(`Failed to ${action} request`);
+      throw error;
+    }
+  };
 
   const value = {
     notifications,
@@ -159,7 +175,8 @@ export const NotificationProvider = ({ children }) => {
     markAllAsRead,
     deleteNotification,
     deleteAllNotifications,
-    refreshNotifications
+    refreshNotifications,
+    processNotificationAction
   };
 
   return (

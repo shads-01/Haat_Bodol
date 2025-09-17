@@ -111,4 +111,23 @@ export const notificationAPI = {
       throw error;
     }
   },
+   processAction: async (notificationId, action) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post(
+        `${API_URL}/notifications/${notificationId}/action`,
+        { action },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error processing action:', error);
+      throw error;
+    }
+  }
 };
