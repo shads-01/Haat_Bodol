@@ -1,16 +1,14 @@
-import { useState, useEffect, createContext, useContext } from "react";
-import { socketService } from "../utils/socket";
-import { notificationAPI } from "../services/notificationService"; // Add this import
-import toast from "react-hot-toast";
+import { useState, useEffect, createContext, useContext } from 'react';
+import { socketService } from '../utils/socket';
+import { notificationAPI } from '../services/notificationService';
+import { toast } from 'react-hot-toast';
 
 const NotificationContext = createContext();
 
 export const useNotifications = () => {
   const context = useContext(NotificationContext);
   if (!context) {
-    throw new Error(
-      "useNotifications must be used within NotificationProvider"
-    );
+    throw new Error('useNotifications must be used within NotificationProvider');
   }
   return context;
 };
@@ -18,84 +16,81 @@ export const useNotifications = () => {
 export const NotificationProvider = ({ children }) => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [socketInitialized, setSocketInitialized] = useState(false);
 
   useEffect(() => {
     const initializeNotifications = async () => {
-      const token = localStorage.getItem("token");
-      if (token) {
+      const token = localStorage.getItem('token');
+      
+      if (token && !socketInitialized) {
         try {
+          console.log('Initializing notifications...');
+          
           // Fetch initial notifications
           const initialNotifications = await notificationAPI.getNotifications();
           setNotifications(initialNotifications);
-
+          
           // Calculate initial unread count
-          const initialUnread = initialNotifications.filter(
-            (n) => !n.read
-          ).length;
+          const initialUnread = initialNotifications.filter(n => !n.read).length;
           setUnreadCount(initialUnread);
 
-          // Connect to socket for real-time updates
+          // Connect to socket for real-time updates (only once!)
           const socket = socketService.connect(token);
-
-          socket.on("new-notification", (notification) => {
-            setNotifications((prev) => [notification, ...prev]);
-            setUnreadCount((prev) => prev + 1);
-
-            // KEEP THIS TOAST FOR REAL-TIME NOTIFICATIONS! 🎯
-            toast.success(notification.message || "New notification!");
+          
+          // Remove any existing listeners first
+          socket.off('new-notification');
+          
+          // Add new listener
+          socket.on('new-notification', (notification) => {
+            console.log('Received new notification:', notification);
+            
+            // Prevent duplicates by checking if notification already exists
+            setNotifications(prev => {
+              const exists = prev.some(n => n._id === notification._id);
+              if (!exists) {
+                return [notification, ...prev];
+              }
+              return prev;
+            });
+            
+            setUnreadCount(prev => prev + 1);
+            toast.success(notification.message || 'New notification!');
           });
 
-          // Cleanup
-          return () => {
-            socket.off("new-notification");
-            socketService.disconnect();
-          };
-        } catch (error) {
-          console.error("Error initializing notifications:", error);
-        }
-      }
-    };
-
-    initializeNotifications();
-  }, []);
-
-  useEffect(() => {
-    const initializeNotifications = async () => {
-      const token = localStorage.getItem("token");
-      if (token) {
-        try {
-          // Fetch initial notifications
-          const initialNotifications = await notificationAPI.getNotifications();
-          setNotifications(initialNotifications);
-
-          // Calculate initial unread count
-          const initialUnread = initialNotifications.filter(
-            (n) => !n.read
-          ).length;
-          setUnreadCount(initialUnread);
-
-          // Connect to socket for real-time updates
-          const socket = socketService.connect(token);
-
-          socket.on("new-notification", (notification) => {
-            setNotifications((prev) => [notification, ...prev]);
-            setUnreadCount((prev) => prev + 1);
-            console.log("New real-time notification:", notification);
-          });
+          setSocketInitialized(true);
 
           // Cleanup on unmount
           return () => {
-            socket.off("new-notification");
-            socketService.disconnect();
+            console.log('Cleaning up socket listeners');
+            socket.off('new-notification');
+            // Don't disconnect here - let the socket service manage connection
           };
+
         } catch (error) {
-          console.error("Error initializing notifications:", error);
+          console.error('Error initializing notifications:', error);
         }
       }
     };
 
     initializeNotifications();
-  }, []);
+
+    // Cleanup when component unmounts or token changes
+    return () => {
+      setSocketInitialized(false);
+    };
+  }, [socketInitialized]); // Only run when socketInitialized changes
+
+  // Add function to manually refresh notifications (without duplicates)
+  const refreshNotifications = async () => {
+    try {
+      const freshNotifications = await notificationAPI.getNotifications();
+      setNotifications(freshNotifications);
+      const unread = freshNotifications.filter(n => !n.read).length;
+      setUnreadCount(unread);
+    } catch (error) {
+      console.error('Error refreshing notifications:', error);
+    }
+  };
 
   const markAsRead = async (notificationId) => {
     try {
@@ -162,8 +157,9 @@ export const NotificationProvider = ({ children }) => {
     setUnreadCount,
     markAsRead,
     markAllAsRead,
-    deleteNotification, // ← Add this
+    deleteNotification,
     deleteAllNotifications,
+    refreshNotifications
   };
 
   return (

@@ -1,13 +1,21 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Container, Row, Col, Card, Badge, Carousel, Alert } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Card,
+  Badge,
+  Carousel,
+  Alert,
+} from "react-bootstrap";
 import { Clock, MapPin } from "lucide-react";
 import axios from "axios";
 import Footer from "./Footer";
 import "../css/ItemDetails.css";
 import { formatDistanceToNow } from "date-fns";
 import { socketService } from "../utils/socket"; // Import socket service
-import { notificationAPI } from "../services/notificationService"; 
+import { notificationAPI } from "../services/notificationService";
 
 function ProductDetails() {
   const { id } = useParams();
@@ -15,8 +23,47 @@ function ProductDetails() {
   const [item, setItem] = useState(null);
   const [donor, setDonor] = useState(null);
   const [isRequesting, setIsRequesting] = useState(false);
-  const [requestStatus, setRequestStatus] = useState(''); // 'success', 'error', ''
+  const [requestStatus, setRequestStatus] = useState(""); // 'success', 'error', ''
+  const [user, setUser] = useState(null);
+  const [isLoadingUser, setIsLoadingUser] = useState(true);
 
+  // Add this useEffect to fetch user data
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          setIsLoadingUser(false);
+          return;
+        }
+
+        const response = await axios.get(
+          "http://localhost:5000/api/auth/profile",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const userData = response.data;
+        setUser(userData);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+
+        if (error.response?.status === 401) {
+          localStorage.removeItem("token");
+        }
+      } finally {
+        setIsLoadingUser(false);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  // Check if current user is the donor
+  const isCurrentUserDonor = user && donor && user._id === donor._id;
   useEffect(() => {
     const fetchItem = async () => {
       try {
@@ -30,6 +77,12 @@ function ProductDetails() {
     fetchItem();
   }, [id]);
 
+  const handleDonorClick = () => {
+    if (donor?._id) {
+      navigate(`/donor/${donor._id}`);
+    }
+  };
+
   const capitalizeWords = (str) => {
     if (!str) return "N/A";
     return str
@@ -40,37 +93,32 @@ function ProductDetails() {
 
   const handleMessageDonor = () => {
     if (!donor) return;
-    
+
     // Navigate to chat page with donor ID
-    navigate('/chat', { state: { startChatWith: donor._id } });
+    navigate("/chat", { state: { startChatWith: donor._id } });
   };
   const handleRequestItem = async () => {
     if (!donor || !item) return;
-    
+
     try {
       setIsRequesting(true);
-      setRequestStatus('');
+      setRequestStatus("");
 
       // Send notification to donor
-      await notificationAPI.sendItemRequest(
-        donor._id, 
-        item._id, 
-        item.title
-      );
-      
-      setRequestStatus('success');
-      
+      await notificationAPI.sendItemRequest(donor._id, item._id, item.title);
+
+      setRequestStatus("success");
+
       // Optional: You can also emit a socket event if needed
       const socket = socketService.getSocket();
-      socket.emit('item-requested', {
+      socket.emit("item-requested", {
         donorId: donor._id,
         itemId: item._id,
-        itemName: item.title
+        itemName: item.title,
       });
-      
     } catch (error) {
-      console.error('Error sending item request:', error);
-      setRequestStatus('error');
+      console.error("Error sending item request:", error);
+      setRequestStatus("error");
     } finally {
       setIsRequesting(false);
     }
@@ -163,26 +211,38 @@ function ProductDetails() {
             </Col>
 
             {/* Right Column - Donor Information */}
-<Col md={12} lg={4}>
+            <Col md={12} lg={4}>
               <div className="bg-white rounded shadow-sm p-4">
                 <h4 className="mb-2">Donated By</h4>
                 {donor ? (
                   <>
-                    <div className="text-center mb-4">
+                    <div
+                      className="text-center mb-4 cursor-pointer transition-all duration-200 hover:bg-gray-50 rounded-lg p-3"
+                      onClick={handleDonorClick}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          handleDonorClick();
+                        }
+                      }}
+                    >
                       <img
                         src={donor.profilePic?.url || "/placeholder.png"}
                         alt="Profile picture"
-                        className="rounded-circle border border-2 border-black"
+                        className="rounded-circle border border-2 border-black hover:scale-105 transition-transform duration-200"
                         width={100}
                         height={100}
                         onError={(e) => {
-                          e.target.src = "/default-avatar.png";
+                          e.target.src = "/placeholder.png";
                         }}
                       />
-
-                      <h5 className="mt-3 mb-1">
+                      <h5 className="mt-3 mb-1 hover:text-blue-600 transition-colors duration-200">
                         {donor.name || "Anonymous Donor"}
                       </h5>
+                      <small className="text-muted">
+                        Click to view profile
+                      </small>
                     </div>
 
                     <div className="border-top pt-3">
@@ -201,40 +261,56 @@ function ProductDetails() {
                     </div>
 
                     <div className="d-grid gap-2 mt-4">
-                      <button 
-                        className="btn btn-dark" 
+                      <button
+                        className="btn btn-dark"
                         onClick={handleRequestItem}
-                        disabled={isRequesting || item.status !== 'available'}
+                        disabled={
+                          isRequesting ||
+                          item.status !== "available" ||
+                          isLoadingUser ||
+                          isCurrentUserDonor
+                        }
                       >
                         {isRequesting ? (
                           <>
                             <span className="spinner-border spinner-border-sm me-2" />
                             Sending Request...
                           </>
+                        ) : isLoadingUser ? (
+                          "Loading..."
+                        ) : isCurrentUserDonor ? (
+                          "Your are the Donor"
+                        ) : item.status === "available" ? (
+                          "Request Item"
                         ) : (
-                          item.status === 'available' ? 'Request Item' : 'Not Available'
+                          "Not Available"
                         )}
                       </button>
-                      
-                      {requestStatus === 'success' && (
+
+                      {requestStatus === "success" && (
                         <Alert variant="success" className="mt-2 mb-0 small">
                           Request sent! The donor will be notified.
                         </Alert>
                       )}
-                      
-                      {requestStatus === 'error' && (
+
+                      {requestStatus === "error" && (
                         <Alert variant="danger" className="mt-2 mb-0 small">
                           Failed to send request. Please try again.
                         </Alert>
                       )}
                     </div>
-                    
+
                     <div className="d-grid gap-2 mt-3">
-                      <button 
-                        className="btn btn-outline-dark" 
+                      <button
+                        className="btn btn-outline-dark"
                         onClick={handleMessageDonor}
+                        disabled={isLoadingUser || isCurrentUserDonor}
                       >
-                        Message Donor
+                        {isLoadingUser
+                          ? "Loading..."
+                          : isCurrentUserDonor
+                          ? "Your are the Donor"
+                          : "Message Donor"}
                       </button>
                     </div>
                   </>
