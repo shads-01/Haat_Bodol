@@ -1,73 +1,44 @@
-# Getting Started with Create React App
+# 🤝 হাতবদল (Haat Bodol)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A community-driven donation platform where people can give away items they no longer need to those who can use them. Built with the MERN stack and real-time communication powered by Socket.io.
 
-## Available Scripts
+## ✨ Technologies
 
-In the project directory, you can run:
+- `React`
+- `Express.js`
+- `MongoDB` / `Mongoose`
+- `Socket.io`
+- `React Bootstrap` / `MUI`
+- `Cloudinary`
+- `JWT` / `bcryptjs`
+- `Nodemailer`
 
-### `npm start`
+## 🚀 Features
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- Email-verified user registration with OTP codes
+- Post donation items with up to 4 photos and detailed descriptions
+- Browse, search, and filter donations by category, condition, status, and time listed
+- Real-time one-on-one chat between donors and receivers
+- Live notification system with read/unread tracking
+- User profiles with donation stats, levels, and profile picture uploads
+- Public donor profiles to view other users' activity
+- Pagination and sorting on the donations page
+- Protected routes with JWT authentication
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 📍 The Process
 
-### `npm test`
+The idea behind হাতবদল is simple — connect people who have something to give with people who need it. We started with a React frontend and an Express backend, wired together through a MongoDB database. The registration flow uses email verification with 6-digit OTP codes sent via Nodemailer, so every user is real. Once logged in, users can post items they want to donate, complete with photos uploaded straight to Cloudinary. The donations page has a full filtering system — by category, condition, availability, and time listed — so finding what you need is quick. The real highlight is the real-time chat system built on Socket.io, which lets donors and receivers talk instantly without refreshing. Notifications pop in live too, so nobody misses a message. It's not perfect yet, but it's a solid foundation for a platform that encourages sharing and sustainability in the community.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## 🚦 Running the Project
 
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
-
-before run the project, please run this following command-
-### 'npm i react-router-dom bootstrap'
+1. Clone the repository
+2. Install client dependencies: `npm install`
+3. Install server dependencies: `cd server && npm install`
+4. Create a `server/.env` file with:
+   ```
+   MONGODB_URI=your_mongodb_connection_string
+   JWT_SECRET=your_jwt_secret
+   ```
+5. Start the backend: `cd server && npm run dev`
+6. Start the frontend (from root): `npm start`
+7. Open `http://localhost:3000` in your browser
